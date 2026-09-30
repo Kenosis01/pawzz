@@ -1,0 +1,89 @@
+/* Empty state: the greeting and the composer centred together as one unit. */
+.dock {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-6);
+  min-height: 0;
+  /* Narrower than the docked prompt (44rem → 40rem, against 46rem docked).
+     With no transcript the box is the whole composition, and at full width it
+     stretches across an empty page as a bare band with nothing to balance it —
+     the focus it is supposed to have goes to how much space it fills instead.
+     Set here rather than on the composer because this is the only container the
+     empty state has: `.footer` never declares it, so the bottom prompt keeps its
+     own width untouched. */
+  --cmp-max: 40rem;
+  /* The group is lifted above true centre so the mark, greeting and prompt read
+     as one block sitting in the upper-middle rather than a prompt marooned near
+     the bottom edge. Clamped so it scales with the viewport instead of being a
+     fixed 64px that dwarfs a short window and vanishes in a tall one. */
+  padding: var(--space-4) var(--space-4) clamp(var(--space-12), 18vh, 11rem);
+}
+
+/* Active state: the transcript takes the screen and the bar docks to the
+   bottom, out of the way. */
+.transcript {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+
+  /* The last few lines soften as they reach the composer.
+     A scroller that ends in a hard edge butts the text straight against the
+     prompt box, and the two read as one crowded object — the answer looks like
+     part of the input. A short mask at the bottom says "there is more above",
+     and it is the same cue the clamped user message already uses, applied to
+     the container rather than to one row.
+
+     `mask-image` rather than an overlaid gradient, because a painted gradient
+     would sit on top of the text and wash it out; a mask removes the pixels,
+     which keeps the type crisp all the way to the fade. */
+  --transcript-fade: 2.5rem;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 var(--transcript-fade),
+    #000 calc(100% - var(--transcript-fade)),
+    transparent 100%
+  );
+}
+
+.footer {
+  flex-shrink: 0;
+  display: flex;
+  /* Column, or the caption lands beside the composer instead of under it. */
+  flex-direction: column;
+  align-items: center;
+  /* Weighted to the bottom. The box and the chin used to sit a full space-6
+     above the edge, which left a band of bare background under the disclaimer
+     and read as though the composer were floating rather than docked. Side
+     padding is kept larger than the bottom so the box never crowds the edge
+     while the caption is allowed to approach it. */
+  padding: var(--space-4) var(--space-4) var(--space-2);
+}
+
+/* Scroll-to-latest, floating over the transcript once you scroll away. */
+.jump {
+  position: sticky;
+  bottom: var(--space-4);
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  margin: calc(-2rem) auto 0;
+  color: var(--foreground-secondary);
+  background: var(--surface-elevated);
+  border: 0.5px solid var(--border);
+  border-radius: 50%;
+  box-shadow: var(--shadow-popover);
+  transition:
+    color var(--duration-micro) var(--ease-standard),
+    background var(--duration-micro) var(--ease-standard);
+}
+
+.jump:hover {
+  color: var(--foreground);
+  background: var(--surface-subtle);
+}

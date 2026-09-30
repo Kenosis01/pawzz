@@ -1,0 +1,53 @@
+/* Top padding is deliberately larger than the bottom: the top-right corner is
+   reserved for the window close button, so the incognito control is tucked
+   below it. Raise this to match the real titlebar height when it lands. */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-1);
+  flex-shrink: 0;
+  padding: var(--space-5) var(--space-3) 0;
+}
+
+/* The hit target, and nothing else. It carries no border: putting the outline
+   here drew a 26px box around a 16px glyph, so the ghost read as an icon
+   sitting inside a container rather than as the icon itself. */
+.action {
+  display: grid;
+  place-items: center;
+  /* 24px is the accessible floor for a pointer target, and the glyph does not
+     need to fill it. */
+  width: 26px;
+  height: 26px;
+  color: var(--muted-foreground);
+  border-radius: var(--radius-sm);
+  transition:
+    color var(--duration-micro) var(--ease-standard),
+    background var(--duration-micro) var(--ease-standard);
+}
+
+.action:hover {
+  color: var(--foreground);
+  background: var(--surface-subtle);
+}
+
+/* The outline hugs the glyph, so it traces the icon instead of boxing it. */
+.glyph {
+  display: grid;
+  place-items: center;
+  padding: 2px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  transition:
+    color var(--duration-micro) var(--ease-standard),
+    border-color var(--duration-micro) var(--ease-standard);
+}
+
+/* Incognito on: a white ring around the icon, and the glyph to full ink. A
+   solid outline rather than a tinted fill — a fill would read as a selection
+   state, and this is a mode. */
+.glyphActive {
+  color: var(--foreground);
+  border-color: var(--foreground);
+}

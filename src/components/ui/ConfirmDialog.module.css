@@ -1,0 +1,120 @@
+/*
+ * The destructive-action dialog.
+ *
+ * A scrim and a card, both in tokens. The card is a floating layer like any
+ * other, so it takes the same hairline and the same shadow; the only colour
+ * that says anything new here is the fill of the confirming button, and it
+ * says it by being the one thing on screen that is a solid block of colour.
+ */
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  /* Dim enough to read as "behind" and light enough to keep the text under it
+     legible — the dialog is a question about that text, not a cover-up. */
+  background: rgb(0 0 0 / 0.32);
+  animation: scrim-in var(--duration-normal) var(--ease-standard);
+}
+
+@keyframes scrim-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.card {
+  width: 100%;
+  /* Narrower than the settings rows it is styled from: two buttons and one
+     question fit in far less than a settings row does, and a 400px card
+     holding 30 characters of text is mostly padding. */
+  max-width: 360px;
+  padding: var(--space-5);
+  background: var(--surface-elevated);
+  border: 0.5px solid var(--material-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-window);
+  /* Lifts and settles rather than fading in place: it arrives from where the
+     pointer was, which is the same gesture every other menu in the app uses. */
+  animation: card-in var(--duration-normal) var(--ease-standard);
+}
+
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+}
+
+.title {
+  font-size: var(--text-body);
+  font-weight: 600;
+  line-height: var(--leading-tight);
+}
+
+.body {
+  margin-top: var(--space-1);
+  color: var(--foreground-secondary);
+  font-size: var(--text-body);
+}
+
+/* Clear of the question, tight within the answer: the gap says these are two
+   different kinds of content, and the second one is the decision. */
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: var(--space-5);
+}
+
+.button,
+.buttonDanger {
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-small);
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  transition:
+    background var(--duration-micro) var(--ease-standard),
+    border-color var(--duration-micro) var(--ease-standard);
+}
+
+.button {
+  color: var(--foreground);
+  background: var(--surface-subtle);
+  border: 0.5px solid var(--border);
+}
+
+.button:hover {
+  background: var(--sidebar-hover);
+  border-color: var(--border-strong);
+}
+
+.buttonDanger {
+  color: var(--danger-fill-foreground);
+  background: var(--danger-fill);
+  border: 0.5px solid transparent;
+}
+
+.buttonDanger:hover {
+  background: var(--danger-fill-hover);
+}
+
+/* The global focus rule also sets a radius, at 8px, which would square off
+   these buttons the moment they take focus. Scoped to the card so it wins
+   outright rather than on stylesheet order. */
+.card .actions .button:focus-visible,
+.card .actions .buttonDanger:focus-visible {
+  outline: none;
+  border-radius: var(--radius-md);
+  box-shadow: var(--focus-ring);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scrim,
+  .card {
+    animation: none;
+  }
+}

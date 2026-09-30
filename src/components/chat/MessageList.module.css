@@ -1,0 +1,519 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  width: 100%;
+  max-width: var(--reading-width);
+  margin-inline: auto;
+  padding: var(--space-6) var(--space-4) var(--space-4);
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+}
+
+.caption {
+  margin-bottom: var(--space-2);
+  color: var(--muted-foreground);
+  font-size: var(--text-small);
+  line-height: 1.4;
+}
+
+/* Clamping needs a known line count, so the text has to be a line box rather
+   than a plain block. Only applied while clamped — the attribute is absent
+   once expanded, and `none` is the initial value. */
+.text {
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.text[data-clamped="true"] {
+  display: -webkit-box;
+  -webkit-line-clamp: 12;
+  line-clamp: 12;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.body {
+  position: relative;
+}
+
+/* Bottom fade. Fades to the bubble's own surface so the clamped line dissolves
+   instead of being sliced off, and stays a sibling of the text so it never
+   covers a selection. */
+.fade {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 3.5rem;
+  pointer-events: none;
+  background: linear-gradient(to bottom, transparent, var(--surface-subtle) 78%);
+}
+
+.row[data-role="user"] .body {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.showMore {
+  align-self: flex-end;
+  margin-top: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  color: var(--muted-foreground);
+  font-family: inherit;
+  font-size: var(--text-caption);
+  border-radius: var(--radius-sm);
+  transition:
+    color var(--duration-micro) var(--ease-standard),
+    background var(--duration-micro) var(--ease-standard);
+}
+
+.showMore:hover {
+  color: var(--foreground);
+  background: var(--surface-subtle);
+}
+
+/* ---- Attachments ----
+   What was sent alongside the message. The composer shows live previews while
+   the blob is alive; the transcript keeps only the description, so a chip here
+   is a durable record rather than a reference to a dead object URL. */
+
+.attachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-2);
+  padding: 0;
+  list-style: none;
+}
+
+/* A widget occupies the reading column and nothing more.
+   It used to break out to a wider `--widget-width` on the theory that a dashboard
+   needs the room. That put a 1080px card under 780px of prose, and the reply
+   stopped reading as one object: the text had a measure, the chart had a
+   different one, and the whole thing looked assembled rather than written. A
+   widget is part of the reply, so it gets the reply's width, its alignment and
+   its left edge, and the chart is drawn to fit rather than the column stretched
+   to fit the chart. */
+.widgetSlot {
+  width: 100%;
+  margin: var(--space-3) 0;
+}
+
+.attachmentCard {
+  max-width: 15rem;
+}
+
+/* A single image with nothing else attached is the message, not a footnote, so
+   it is allowed to be the size of the message. */
+.attachmentCard[data-solo="true"] {
+  max-width: 28rem;
+  width: 100%;
+}
+
+.row[data-role="user"] .attachments {
+  justify-content: flex-end;
+}
+
+/* Image: the picture is the content, so it is shown rather than named. */
+.imageCard {
+  margin: 0;
+  overflow: hidden;
+  background: var(--surface-subtle);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.imageCard img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 18rem;
+  object-fit: contain;
+}
+
+.attachmentCard[data-solo="true"] .imageCard img {
+  max-height: 26rem;
+}
+
+/* Pasted block: a few lines of what was pasted, then a tag saying where it
+   came from. Clamped because the point is context, not the whole paste. */
+.pasteCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-subtle);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.pasteText {
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  color: var(--foreground-secondary);
+  font-size: var(--text-small);
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+/* File: all we have is a name, so the card leads with it and the tag carries
+   the type. */
+.fileCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-subtle);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.fileName {
+  color: var(--foreground);
+  font-size: var(--text-small);
+  overflow-wrap: break-word;
+}
+
+/* The tag reads as a stamp on the card, not as a button. */
+.cardTag {
+  align-self: flex-start;
+  padding: 0.0625rem var(--space-2);
+  color: var(--foreground-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.5625rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: var(--surface-elevated);
+  border: 0.5px solid var(--border);
+  border-radius: 3px;
+}
+
+/* ---- Inline edit ----
+   The message becomes its own editing surface: a text area, then Cancel and
+   Save. Deliberately not the prompt box — see MessageList. */
+
+/* Wrapper carries the width and the right alignment. It has no border of its
+   own, which is the point: the outline belongs to the text being edited, and
+   the buttons sit below it rather than inside the box. */
+.editWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-2);
+  width: 100%;
+  max-width: min(85%, 34rem);
+  margin-left: auto;
+}
+
+.editBlock {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface);
+  /* A hairline, like every other field in the app. This was a 2px accent border
+     with a focus ring behind it, which read as an error rather than an edit. */
+  border: 0.5px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  transition: border-color var(--duration-micro) var(--ease-standard);
+}
+
+.editBlock:focus-within {
+  border-color: var(--muted-foreground);
+}
+
+.editArea {
+  width: 100%;
+  /* Script writes the height from scrollHeight, so a one-line prompt stays one
+     line. min-height is just the floor for an empty draft. */
+  min-height: 1.5rem;
+  max-height: 22rem;
+  padding: var(--space-1) 0;
+  overflow-y: auto;
+  color: var(--foreground);
+  font-family: inherit;
+  font-size: var(--text-body);
+  line-height: 1.5;
+  background: transparent;
+  border: none;
+  resize: vertical;
+}
+
+.editArea:focus {
+  outline: none;
+}
+
+.editActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.editButton {
+  padding: var(--space-1) var(--space-3);
+  color: var(--foreground);
+  font-family: inherit;
+  font-size: var(--text-small);
+  background: var(--surface-elevated);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-md);
+  transition:
+    background var(--duration-micro) var(--ease-standard),
+    color var(--duration-micro) var(--ease-standard),
+    opacity var(--duration-micro) var(--ease-standard);
+}
+
+.editButton:hover:not(:disabled) {
+  background: var(--surface-subtle);
+  border-color: var(--border-strong);
+}
+
+.editButton:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+
+/* User: a contained block on the right, so it never competes with the answer. */
+.row[data-role="user"] {
+  align-items: flex-end;
+}
+
+.row[data-role="user"] .text {
+  max-width: min(85%, 34rem);
+  width: fit-content;
+  padding: var(--space-3) var(--space-4);
+  color: var(--foreground);
+  font-size: var(--text-body);
+  line-height: 1.5;
+  font-weight: 500;
+  background: var(--surface-subtle);
+  border: 0.5px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+}
+
+/* Assistant: full-width prose, the primary reading column. Set in the editorial
+   face, one size up from the interface type — a long answer in a UI face reads as
+   a form, and this is the part of the product someone actually reads. */
+.row[data-role="assistant"] .text {
+  /* Matches the composer's docked width, so the reply and the prompt it is
+     answering share one measure. A narrower reply inside a wider prompt box
+     reads as two unrelated columns. */
+  max-width: 46rem;
+  color: var(--foreground);
+  font-family: var(--font-response), Georgia, serif;
+  /* 400 rather than 500: Source Serif 4's regular already has the colour of a
+     text face, and 500 on top of it lands on 600 and makes the reply look
+     emphasised throughout. */
+  font-weight: 400;
+  /* Body size. Headings and list items step up from here, in Markdown.module.css
+     — 16px for prose and 18px for anything that labels or enumerates it, which
+     is the scale the reference uses. */
+  font-size: 1rem;
+  /* 24px exactly: 16 x 1.5. */
+  line-height: 1.5;
+  letter-spacing: 0.001em;
+}
+
+/* Metadata row: timestamp and actions, sitting under the message and aligned
+   to the same edge as the text above it. */
+.meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  opacity: 0;
+  transition: opacity var(--duration-normal) var(--ease-standard);
+}
+
+.row:hover .meta,
+.row:focus-within .meta {
+  opacity: 1;
+}
+
+.stamp {
+  color: var(--muted-foreground);
+  font-size: var(--text-caption);
+  white-space: nowrap;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+}
+
+.action {
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--muted-foreground);
+  border-radius: var(--radius-sm);
+  transition:
+    color var(--duration-micro) var(--ease-standard),
+    background var(--duration-micro) var(--ease-standard);
+}
+
+.action:hover {
+  color: var(--foreground);
+  background: var(--surface-subtle);
+}
+
+.row[data-role="user"] .meta {
+  justify-content: flex-end;
+}
+
+/* A failed request is shown under the transcript, not as a message row. It is
+   not something the assistant said, and rendering it in the assistant's column
+   would put words in its mouth that it never spoke. */
+.error {
+  padding: var(--space-3) var(--space-4);
+  color: var(--foreground-secondary);
+  font-size: var(--text-small);
+  line-height: 1.5;
+  background: var(--surface-subtle);
+  border-left: 2px solid var(--danger);
+  border-radius: var(--radius-sm);
+}
+
+/* The interrupted notice.
+   A single quiet bar rather than a message, because nothing was *said* — the
+   reply was cut off by the reader, and putting that in the transcript in the
+   assistant's own column would attribute the interruption to the model. The
+   actions sit on the right because they are a decision, and a decision belongs
+   where the eye already is after a long answer. */
+.interrupted {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-subtle);
+  border: 0.5px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.interruptedText {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--foreground-secondary);
+  font-size: var(--text-small);
+}
+
+.interruptedActions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.interruptedButton {
+  padding: var(--space-1) var(--space-3);
+  color: var(--foreground);
+  font-size: var(--text-small);
+  font-weight: 500;
+  background: var(--surface-elevated);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition:
+    background var(--duration-micro) var(--ease-standard),
+    border-color var(--duration-micro) var(--ease-standard);
+}
+
+.interruptedButton:hover {
+  background: var(--surface);
+  border-color: var(--border-strong);
+}
+
+/* Off-screen for a screen reader only.
+   The clip, not `display: none`: a hidden element is not announced at all, and
+   the whole point of this text is to be announced while the mark animates. */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* The mark that breathes while a reply is arriving.
+   Block, centred under the reply, so it reads as the model's own presence at
+   the end of its answer rather than as part of the text. `display: block` on a
+   flex/grid parent is what centres it; the row is a flex column. */
+
+.thinking {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: var(--space-3);
+}
+
+.thinkingMark {
+  /* No `opacity` anywhere in this animation, and that is a deliberate
+     constraint rather than an omission. A mark that also fades reads as
+     appearing and disappearing — it stops being an object and becomes a
+     blinking indicator. Scaling alone keeps the mark present at all times and
+     lets the motion carry the meaning, which is what makes it read as something
+     working rather than something about to appear. */
+  animation: breathe 1.15s var(--ease-standard) infinite;
+  transform-origin: center;
+}
+
+/* Compress, release, settle, hold.
+   Two oscillations of decreasing amplitude, so the loop returns to rest rather
+   than cutting — a single sine reads as a pulse, and a pulse reads as an alert.
+   The shape here is closer to breathing: down hard, up past the mark's own size,
+   back through it, and then a slow drift into the next compression. */
+@keyframes breathe {
+  0% {
+    transform: scale(0.62);
+  }
+
+  22% {
+    transform: scale(1.14);
+  }
+
+  42% {
+    transform: scale(0.9);
+  }
+
+  60% {
+    transform: scale(1.04);
+  }
+
+  78% {
+    transform: scale(0.96);
+  }
+
+  100% {
+    transform: scale(0.62);
+  }
+}
+
+/* Motion is the whole signal here, so under reduced motion it is replaced by
+   something static that still says "busy" — a held mark, rather than nothing,
+   because a silent row with no indicator looks like a finished reply. */
+/* Settled. The mark stays, the breathing stops — an answer that keeps pulsing
+   after it is finished is nagging rather than signing off. */
+.thinkingMarkStill {
+  animation: none;
+  transform: scale(0.94);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .thinkingMark {
+    animation: none;
+  }
+}

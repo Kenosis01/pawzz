@@ -1,0 +1,439 @@
+/*
+ * Markdown inside the transcript.
+ *
+ * The reading column sets the measure and rhythm; everything here is about
+ * making rendered output sit inside that column rather than shout over it. A
+ * model reply can contain a heading, a table, a maths block and a 40-line
+ * snippet, and all of them have to land as one piece of writing rather than as
+ * four competing surfaces.
+ *
+ * Colour comes from tokens only. The syntax theme is the exception and is set
+ * once, from the same token values, so code never looks pasted in from another
+ * site.
+ */
+
+.body {
+  color: var(--foreground);
+
+  /* Not `pre-wrap`, which is what the surrounding `.text` uses.
+     The user half of a row needs it — someone who typed a line break means it,
+     and collapsing it would run their prompt together. But the parser emits
+     newline *text nodes* between block elements, and under `pre-wrap` every one
+     of those becomes a real line break: a blank line above each paragraph, a
+     blank line between every pair of list items, one below the list. That is
+     where the "spacing is too much" came from — it was never the gap value, it
+     was a whole extra line-height inserted in each gap. `normal` is also what
+     the source actually means, since a paragraph is a paragraph rather than a
+     run of characters with newlines in it. */
+  white-space: normal;
+
+  /* Deliberately no font-size and no line-height here.
+     The transcript sets the assistant's reading type — the editorial face at
+     1.1875rem — on the wrapper, and this component used to override it with
+     `--text-body`. That made every rendered reply *smaller* than a plain one:
+     15px of Garamond is below the size at which that face is legible, and it is
+     the reason a formatted answer read as harder to read than an unformatted
+     one. Inheriting keeps markdown and plain prose at the same size, which is
+     what a reader assumes. */
+
+  overflow-wrap: break-word;
+
+  /* A flex column with an explicit gap, rather than margins on every child.
+     Vertical margins between siblings do not reliably collapse here — the
+     markdown tree mixes block children, KaTeX's own wrappers and
+     `rehype-highlight`'s, several of which establish their own box — so adjacent
+     margins were *adding* rather than collapsing, which is how a paragraph and a
+     code block ended up 28px apart. A gap is one number, applies the same way
+     everywhere, and cannot be broken by a wrapper somebody else added. */
+  display: flex;
+  flex-direction: column;
+  /* Tight. At 1.25rem with a 1.6 leading the lines are already 32px, so a 16px
+     gap on top of that reads as a document with air punched between every
+     paragraph. Half a line is enough to say "new paragraph" without opening a
+     hole in the page. */
+  gap: 0.5rem;
+}
+
+/* With the parent's gap doing the spacing, the children carry none. Keeping a
+   token margin here as well would double every interval. */
+.body > * {
+  margin: 0;
+}
+
+/* Anything dense or technical steps out of the editorial face. Cormorant is
+   drawn for display sizes; at table and list sizes its thin strokes close up,
+   and it has no monospaced equivalent for code at all. The serif stays for
+   prose, which is where it earns its place. */
+/* Code and maths leave the editorial face; nothing else does.
+
+   This list was longer — tables, lists and blockquotes were in the sans too, on
+   the theory that a dense grid wants a UI face. That is defensible in isolation
+   and wrong in a reply, because a formatted answer is mostly *not* those
+   elements. The effect was that the face changed three or four times inside one
+   message — serif prose, then sans for the list, then sans for the quote, then
+   mono for the snippet — and it read as the font breaking rather than as the
+   content changing. A reader should be able to tell what kind of thing they are
+   reading from the shape of it, not from a typeface swap.
+
+   So prose keeps the serif throughout, including in tables and quotes, and the
+   only two things that change face are the two that genuinely need different
+   shapes: code, which has to be monospaced to be readable, and maths, which
+   brings its own glyph set. */
+.body pre,
+.body code {
+  font-family: var(--font-mono);
+}
+
+.body .katex {
+  font-family: var(--font-sans);
+}
+
+.body h1,
+.body h2,
+.body h3,
+.body h4 {
+  /* Only the space *above* a heading, and it stacks on the parent's gap rather
+     than replacing it — a heading needs more air than a paragraph does, or it
+     reads as part of the paragraph it follows. */
+  margin: 0.875rem 0 0;
+  font-weight: 600;
+  line-height: var(--leading-tight);
+  color: var(--foreground);
+}
+
+/* One step up from the 16px body, not a scale of its own.
+   A heading that is twice the size of the text it introduces stops being a label
+   and starts being a second first level; at 1.125em the hierarchy is carried by
+   weight and the extra 2px, which is enough to separate without announcing. */
+.body h1,
+.body h2,
+.body h3,
+.body h4 {
+  font-size: 1.125em;
+}
+
+.body a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* 600, not 700 and not "bold".
+   The editorial face is loaded at 300/400/500/600/700 (see layout.tsx), and
+   asking for 700 makes the run heavier than the surrounding 500 text enough to
+   look like a different size rather than a stronger one. `bold` is the same
+   request made vaguer, and resolves to whatever the family happens to map. */
+.body strong,
+.body b {
+  font-weight: 600;
+}
+
+/* Body size, same as the surrounding prose.
+   This was 1.125em — the same as a heading — so a bulleted list read as a
+   sequence of headings and a reply that alternated the two looked like it was
+   changing font size for no reason. A list is a different *structure*, not a
+   different voice, and structure is already carried by the bullets, the indent
+   and the gap. Two text sizes in a reply is a scale; three is a mistake. */
+.body ul,
+.body ol {
+  padding-left: var(--space-6);
+}
+
+.body li {
+  margin-block: 0.125rem;
+}
+
+.body li::marker {
+  color: var(--muted-foreground);
+}
+
+.body blockquote {
+  padding: var(--space-1) 0 var(--space-1) var(--space-4);
+  color: var(--foreground-secondary);
+  border-left: 2px solid var(--border-strong);
+}
+
+.body hr {
+  border: none;
+  border-top: 0.5px solid var(--border);
+}
+
+/* ---- Tables ----
+   Framed, scrollable, and rounded.
+
+   The rounding lives on the wrapper rather than on the table because a
+   collapsed-border table has no box of its own to round, so a tinted header row
+   runs square into the edge of the reply — which is what a table looked like
+   before this: a slab of slightly darker grey with hard corners, pasted into a
+   paragraph. The wrapper is a real box, so it can be rounded and clipped, and it
+   carries the horizontal scroll, which is a property of the table's width and not
+   of the text around it. */
+
+.tableFrame {
+  overflow-x: auto;
+  overflow-y: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.body table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-small);
+}
+
+.body th,
+.body td {
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+  border-bottom: 1px solid var(--border-subtle);
+  white-space: nowrap;
+}
+
+.body th {
+  color: var(--foreground);
+  font-weight: 600;
+  background: var(--surface-subtle);
+}
+
+/* The last row's rule is the frame's own bottom edge, so it is removed rather
+   than doubled up against it. */
+.body tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* ---- Inline code ----
+   Distinct from a block, and quiet enough not to compete with a link. */
+
+.body :not(pre) > code {
+  padding: 0.1em 0.35em;
+  color: var(--foreground);
+  font-family: var(--font-mono);
+  /* `em`, so inline code tracks the prose around it rather than being pinned to
+     an absolute size that is right for one context and wrong for another. */
+  font-size: 0.86em;
+  background: var(--code-background);
+  border-radius: var(--radius-sm);
+}
+
+/* ---- Code blocks ----
+   A frame with a bar, so a fence reads as an object rather than as a gap in
+   the prose. `position: relative` is not used: the bar is in flow, which keeps
+   the block's own height honest when a snippet is longer than the viewport. */
+
+.codeBlock {
+  overflow: hidden;
+  background: var(--code-background);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.codeBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-1) var(--space-2) var(--space-1) var(--space-3);
+  background: var(--surface-subtle);
+  border-bottom: 0.5px solid var(--border-subtle);
+}
+
+.codeLang {
+  color: var(--muted-foreground);
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  text-transform: lowercase;
+}
+
+/* A square icon button, sized to the smallest comfortable target rather than
+   to the glyph: at 14px the icon alone would be a 14px hit area. */
+.copy {
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  color: var(--muted-foreground);
+  border-radius: var(--radius-sm);
+  transition:
+    color var(--duration-micro) var(--ease-standard),
+    background var(--duration-micro) var(--ease-standard);
+}
+
+.copy:hover {
+  color: var(--foreground);
+  background: var(--surface-elevated);
+}
+
+/* The confirmation is the same button changing glyph, so it needs no width of
+   its own and cannot shift the code bar as it appears. */
+.copyDone {
+  color: var(--success);
+}
+
+.codeBlock pre {
+  margin: 0;
+  padding: var(--space-3);
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  /* Scaled off the prose rather than taken from `--text-code`. The reply is set
+     at 1.1875rem, so a fixed 13px step down reads as a different document; a
+     ratio keeps code in the same visual family as the sentence introducing it
+     and still lands near 15px, which is where code becomes comfortable. */
+  font-size: 0.8125em;
+  line-height: 1.6;
+  background: transparent;
+}
+
+.codeBlock code {
+  font-family: inherit;
+}
+
+/* ---- Maths ----
+   KaTeX brings its own metrics and its own fonts. Block maths is centred and
+   allowed to overflow rather than being clipped or shrunk. */
+
+/* KaTeX sizes itself in `em`, so it inherits the prose scale — but only if
+   nothing above it has reset it, and the editorial face has no maths glyphs
+   worth using at all.
+
+   Held at 1em, same as the rest of the reply. This was 1.06em inline and 1.1em
+   for display, and both were a fourth size the eye had to re-learn mid-paragraph;
+   a fraction set slightly larger than the line around it is the one place a
+   reader is already looking harder, so it does not need extra help. Legibility
+   at a glance comes from the whitespace KaTeX puts around a display fraction,
+   which is not something a font-size change adds to. */
+.body .katex {
+  font-size: 1em;
+}
+
+.body .katex-display {
+  margin: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-block: var(--space-1);
+  font-size: 1em;
+}
+
+/* ---- The reveal, while a reply is arriving ----
+   The first attempt animated a span around the newest characters, and it was
+   invisible. The reason is arithmetic: a new span mounted on every 32ms render,
+   restarting a 240ms animation each time, so the animation never got past about
+   an eighth of its own duration. The tail sat permanently near `blur(5px)` and
+   `opacity: 0` — which is not "a soft blur in", it is unreadable text.
+
+   So the reveal is per *block* instead of per chunk, which is the only place it
+   can be done to rendered Markdown. Each top-level block the parser produces —
+   a paragraph, a heading, a list, a code frame — animates in once as it appears,
+   and a run of replies with any structure shows it several times. The words
+   inside a block that is still growing are not animated, because animating them
+   means remounting a subtree the parser is actively rewriting.
+
+   Pacing between the blocks is the stream's job, not the animation's: the words
+   arrive at reading speed from `smoothStream` and the throttle on the client. */
+.body[data-streaming="true"] > * {
+  animation: block-in 340ms var(--ease-standard) both;
+}
+
+/* The blur leads, the fade follows. Opacity alone is a cross-dissolve and reads
+   as a ghost; the blur is what makes the block arrive from somewhere. The lift
+   is small — enough to give it a direction, not enough to look like a bounce. */
+@keyframes block-in {
+  from {
+    opacity: 0;
+    filter: blur(7px);
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+
+/* ---- Syntax highlighting ----
+   The palette lives in tokens.css; this file only maps it.
+
+   Every selector here is wrapped in `:global()`. That is not stylistic: CSS
+   Modules rewrites class names it owns into hashed ones, and it rewrites *any*
+   class in a selector — including `.hljs-keyword`, which highlight.js writes at
+   runtime and which therefore still exists as the plain string. Without
+   `:global` the rule became `.Markdown_hljs-keyword__hsjgq`, matched nothing,
+   and every snippet rendered as a single flat colour. The classes are not ours,
+   so they must not be hashed.
+
+   Coverage is the other half of the job. highlight.js emits a long tail of
+   classes, and an unstyled one falls back to the same colour as its neighbours —
+   so a block reads as half-highlighted and looks broken rather than
+   incomplete. Anything genuinely unknown stays at the foreground instead of
+   turning into a default that is invisible on this background. */
+
+.body :global(.hljs) {
+  color: var(--foreground);
+  background: transparent;
+}
+.body :global(.hljs-comment), .body :global(.hljs-quote) {
+  color: var(--syntax-comment);
+  font-style: italic;
+}
+
+.body :global(.hljs-doctag), .body :global(.hljs-meta), .body :global(.hljs-meta-keyword), .body :global(.hljs-meta-string) {
+  color: var(--syntax-comment);
+}
+
+.body :global(.hljs-keyword), .body :global(.hljs-selector-tag), .body :global(.hljs-selector-class), .body :global(.hljs-selector-id), .body :global(.hljs-selector-pseudo), .body :global(.hljs-literal), .body :global(.hljs-tag), .body :global(.hljs-name), .body :global(.hljs-built_in), .body :global(.hljs-operator), .body :global(.hljs-punctuation), .body :global(.hljs-subst) {
+  color: var(--syntax-keyword);
+}
+
+.body :global(.hljs-string), .body :global(.hljs-regexp), .body :global(.hljs-char), .body :global(.hljs-char.escape_), .body :global(.hljs-addition) {
+  color: var(--syntax-string);
+}
+
+.body :global(.hljs-number), .body :global(.hljs-symbol), .body :global(.hljs-bullet), .body :global(.hljs-link) {
+  color: var(--syntax-number);
+}
+
+.body :global(.hljs-title), .body :global(.hljs-title.class_), .body :global(.hljs-title.function_), .body :global(.hljs-section) {
+  color: var(--syntax-func);
+}
+
+.body :global(.hljs-type), .body :global(.hljs-params) {
+  color: var(--syntax-type);
+}
+
+.body :global(.hljs-variable), .body :global(.hljs-variable.language_), .body :global(.hljs-template-variable), .body :global(.hljs-attr), .body :global(.hljs-attribute), .body :global(.hljs-property) {
+  color: var(--syntax-const);
+}
+
+.body :global(.hljs-deletion) {
+  color: var(--danger);
+}
+
+.body :global(.hljs-emphasis) {
+  font-style: italic;
+}
+
+.body :global(.hljs-strong) {
+  font-weight: 600;
+}
+
+/* Under reduced motion the reveal still has to happen — it is how the reader
+   knows a block arrived — so it becomes a plain fade with no blur and no
+   movement. Dropping it would leave every block appearing at once, which is the
+   thing the reveal exists to prevent. */
+@media (prefers-reduced-motion: reduce) {
+  .body[data-streaming="true"] > * {
+    animation: fade-in 180ms linear both;
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+}

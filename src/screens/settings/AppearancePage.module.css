@@ -1,0 +1,70 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  max-width: var(--reading-width);
+  padding: var(--space-8);
+}
+
+.heading {
+  font-size: var(--text-subsection);
+  font-weight: 600;
+}
+
+.sub {
+  margin-top: var(--space-1);
+  color: var(--muted-foreground);
+  font-size: var(--text-small);
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  max-width: 420px;
+}
+
+.option {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-raised);
+  transition: border-color var(--duration-micro) var(--ease-standard);
+}
+
+.option:hover {
+  border-color: var(--border-strong);
+}
+
+.option[aria-checked="true"] {
+  border-color: var(--accent);
+  box-shadow: var(--focus-ring);
+}
+
+.optionLabel {
+  font-size: var(--text-body);
+  font-weight: 500;
+}
+
+.optionHint {
+  color: var(--muted-foreground);
+  font-size: var(--text-small);
+}
+
+.check {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-4);
+  width: 14px;
+  height: 14px;
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 3px var(--surface);
+}

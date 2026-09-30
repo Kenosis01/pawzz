@@ -1,0 +1,290 @@
+/*
+ * Hover animations, matching the motion the Lucide Animated library defines
+ * for each glyph but expressed as CSS keyframes — no motion runtime.
+ *
+ * Timings mirror the library (600ms folder, 500ms bot, 400ms plus) and all run
+ * once on hover. Nothing loops, and reduced-motion disables them entirely.
+ */
+
+.icon {
+  flex-shrink: 0;
+  transform-origin: center;
+}
+
+[data-icon-trigger]:hover .plus,
+[data-icon-trigger]:focus-visible .plus {
+  animation: plus-spin 400ms var(--ease-standard);
+}
+
+[data-icon-trigger]:hover .folder,
+[data-icon-trigger]:focus-visible .folder {
+  animation: folder-wiggle 600ms var(--ease-standard);
+}
+
+[data-icon-trigger]:hover .bot,
+[data-icon-trigger]:focus-visible .bot {
+  animation: bot-blink 500ms var(--ease-standard);
+}
+
+[data-icon-trigger]:hover .settings,
+[data-icon-trigger]:focus-visible .settings {
+  animation: settings-turn 500ms var(--ease-standard);
+}
+
+[data-icon-trigger]:hover .sun,
+[data-icon-trigger]:focus-visible .sun {
+  animation: sun-pulse 500ms var(--ease-standard);
+}
+
+[data-icon-trigger]:hover .chevron,
+[data-icon-trigger]:focus-visible .chevron {
+  animation: chevron-nudge 300ms var(--ease-standard);
+}
+
+[data-icon-trigger]:hover .ghost,
+[data-icon-trigger]:focus-visible .ghost {
+  animation: ghost-float 700ms var(--ease-standard);
+}
+
+[data-icon-trigger]:hover .eye {
+  animation: eye-blink 500ms var(--ease-standard);
+}
+
+.rays {
+  transform-origin: center;
+}
+
+.ghostBody {
+  transform-origin: center;
+}
+
+@keyframes plus-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(180deg);
+  }
+}
+
+@keyframes folder-wiggle {
+  0% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-8deg);
+  }
+  50% {
+    transform: rotate(6deg);
+  }
+  75% {
+    transform: rotate(-4deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes bot-blink {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(1px);
+  }
+}
+
+@keyframes settings-turn {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(90deg);
+  }
+}
+
+@keyframes sun-pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes chevron-nudge {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes ghost-float {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  40% {
+    transform: translateY(-2px);
+    opacity: 0.72;
+  }
+  70% {
+    transform: translateY(1px);
+    opacity: 1;
+  }
+}
+
+@keyframes eye-blink {
+  0%,
+  100% {
+    transform: translateY(0) scaleY(1);
+  }
+  50% {
+    transform: translateY(1px) scaleY(0.4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .icon,
+  .rays,
+  .eye {
+    animation: none !important;
+  }
+}
+
+[data-icon-trigger]:hover .mic,
+[data-icon-trigger]:focus-visible .mic {
+  animation: mic-pulse 900ms var(--ease-standard);
+}
+
+[data-icon-trigger]:hover .arrowUp,
+[data-icon-trigger]:focus-visible .arrowUp {
+  animation: arrow-lift 300ms var(--ease-standard);
+}
+
+@keyframes mic-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
+}
+
+@keyframes arrow-lift {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+[data-icon-trigger]:hover .arrowRight,
+[data-icon-trigger]:focus-visible .arrowRight {
+  animation: arrow-nudge 300ms var(--ease-standard);
+}
+
+@keyframes arrow-nudge {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(2px);
+  }
+}
+
+@keyframes db-lift {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-1.5px);
+  }
+}
+
+[data-icon-trigger]:hover .scroll,
+[data-icon-trigger]:focus-visible .scroll {
+  animation: scroll-unfurl 480ms var(--ease-standard);
+}
+
+@keyframes scroll-unfurl {
+  0%,
+  100% {
+    transform: translateY(0) scaleY(1);
+  }
+  45% {
+    transform: translateY(-1px) scaleY(1.06);
+  }
+}
+
+[data-icon-trigger]:hover .arrowDown,
+[data-icon-trigger]:focus-visible .arrowDown {
+  animation: arrow-drop 300ms var(--ease-standard);
+}
+
+@keyframes arrow-drop {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(2px);
+  }
+}
+
+[data-icon-trigger]:hover .rotateCcw,
+[data-icon-trigger]:focus-visible .rotateCcw {
+  animation: spin-back 520ms var(--ease-standard);
+}
+
+[data-icon-trigger]:hover .pencil,
+[data-icon-trigger]:focus-visible .pencil {
+  animation: pencil-nudge 300ms var(--ease-standard);
+}
+
+[data-icon-trigger]:hover .waveform,
+[data-icon-trigger]:focus-visible .waveform {
+  animation: wave-pulse 900ms var(--ease-standard);
+}
+
+@keyframes spin-back {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-180deg);
+  }
+}
+
+@keyframes pencil-nudge {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(1px, -1px);
+  }
+}
+
+@keyframes wave-pulse {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(1.12);
+  }
+}

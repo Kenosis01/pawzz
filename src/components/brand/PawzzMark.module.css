@@ -1,0 +1,61 @@
+/* The mark is a bare paw in the brand accent — no tile, no container. */
+
+.mark {
+  flex-shrink: 0;
+  overflow: visible;
+  animation: mark-in 420ms var(--ease-standard) both;
+}
+
+@keyframes mark-in {
+  from {
+    opacity: 0;
+    transform: scale(0.86);
+  }
+}
+
+.paw {
+  fill: var(--accent);
+  transform-origin: 16px 20px;
+  cursor: pointer;
+  transition: transform var(--duration-normal) var(--ease-standard);
+}
+
+.toes,
+.pad {
+  fill: var(--accent);
+  transform-origin: center;
+  transition: transform var(--duration-normal) var(--ease-standard);
+}
+
+/* Click: the paw presses down and squashes. */
+.paw:active {
+  transform: translateY(1px) scale(0.94);
+  transition-duration: 80ms;
+}
+
+.paw:active .pad {
+  transform: scaleY(0.88);
+  transition-duration: 80ms;
+}
+
+.paw:active .toes {
+  transform: translateY(0.5px);
+  transition-duration: 80ms;
+}
+
+/* Hover: a small lift, so the press has somewhere to travel from. */
+.paw:hover {
+  transform: translateY(-1.5px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mark {
+    animation: none;
+  }
+
+  .paw,
+  .toes,
+  .pad {
+    transition: none;
+  }
+}

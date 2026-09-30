@@ -1,0 +1,119 @@
+/*
+ * The squish switch.
+ *
+ * The track and thumb are the only moving parts, and the thumb's squash is done
+ * in JS with a transform rather than in CSS — see the note in SquishSwitch.tsx.
+ * What is left here is the shape of the control and the colour cross-fade, which
+ * the browser can do on the compositor.
+ *
+ * Colours arrive as custom properties from the component, so the values live with
+ * the component and the theme follows the tokens rather than being restated here.
+ */
+
+.root {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.switch {
+  --ss-w: 44px;
+  --ss-h: 24px;
+  --ss-inset: 3px;
+  --ss-thumb: 18px;
+  --ss-r: 999px;
+  --ss-thumb-r: 999px;
+  --ss-track: var(--surface-subtle);
+  --ss-track-on: var(--accent);
+  --ss-thumb-color: var(--muted-foreground);
+  --ss-thumb-on: var(--accent-foreground);
+  --ss-fade: 320ms;
+
+  position: relative;
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+  border: 0.5px solid var(--border);
+  background: none;
+  cursor: pointer;
+  outline: none;
+  /* `pan-y`, not `none`: the control drags horizontally, and a vertical swipe
+     starting on it has to still scroll the page rather than being swallowed. */
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* The hit area is larger than the control. A 24px-tall switch is below the
+   comfortable target size, and the visible track stays small because it is a
+   setting, not a button you press often. */
+.switch::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+}
+
+.switch[data-held] {
+  cursor: grabbing;
+}
+
+.switch[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.track {
+  position: relative;
+  display: block;
+  width: var(--ss-w);
+  height: var(--ss-h);
+  border-radius: var(--ss-r);
+  background: var(--ss-track);
+  transition:
+    background-color var(--ss-fade) ease,
+    border-color var(--ss-fade) ease;
+}
+
+.switch[data-on] {
+  border-color: transparent;
+}
+
+.switch[data-on] .track {
+  background: var(--ss-track-on);
+}
+
+.thumb {
+  position: absolute;
+  top: var(--ss-inset);
+  left: 0;
+  width: var(--ss-thumb);
+  height: var(--ss-thumb);
+  border-radius: var(--ss-thumb-r);
+  background: var(--ss-thumb-color);
+  transition: background-color var(--ss-fade) ease;
+}
+
+.switch[data-on] .thumb {
+  background: var(--ss-thumb-on);
+}
+
+/* Focus is drawn on the track, because the button itself is only as large as the
+   control and the ring is easier to see against the filled pill. */
+.switch:focus-visible .track {
+  box-shadow: var(--focus-ring);
+}
+
+.label {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .track,
+  .thumb {
+    transition-duration: 1ms;
+  }
+}

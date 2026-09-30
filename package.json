@@ -1,0 +1,53 @@
+{
+  "name": "pawwzz",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "next build",
+    "check": "next lint && tsc --noEmit",
+    "dev": "next dev",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
+    "format:write": "prettier --write \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
+    "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "preview": "next build && next start",
+    "start": "next start",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ai-sdk/openai": "^4.0.78",
+    "@ai-sdk/react": "^4.0.121",
+    "@t3-oss/env-nextjs": "^0.12.0",
+    "ai": "^7.0.118",
+    "katex": "^0.18.9",
+    "motion": "^13.4.4",
+    "next": "^15.2.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-markdown": "^10.1.0",
+    "rehype-highlight": "^7.0.2",
+    "rehype-katex": "^7.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@tailwindcss/postcss": "^4.0.15",
+    "@types/node": "^20.14.10",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "eslint": "^9.23.0",
+    "eslint-config-next": "^15.2.3",
+    "postcss": "^8.5.3",
+    "prettier": "^3.5.3",
+    "prettier-plugin-tailwindcss": "^0.6.11",
+    "tailwindcss": "^4.0.15",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.27.0"
+  },
+  "ct3aMetadata": {
+    "initVersion": "7.40.0"
+  }
+}

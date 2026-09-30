@@ -1,0 +1,521 @@
+.sidebar {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  width: var(--sidebar-width);
+  flex-shrink: 0;
+  padding: var(--space-3) var(--space-2) var(--space-2);
+  overflow: hidden;
+  /* Opaque, not the translucent --material layer. A translucency cannot resolve
+     to a flat #111111, and the blur bought nothing here: the sidebar has
+     nothing scrolling beneath it to blur. */
+  background: var(--sidebar);
+  border-right: 0.5px solid var(--border);
+  transition: width var(--duration-workspace) var(--ease-standard);
+}
+
+.collapsed {
+  width: 0;
+  padding-inline: 0;
+  border-right-color: transparent;
+}
+
+.resizing {
+  transition: none;
+  user-select: none;
+}
+
+.resizer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 8px;
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.resizer::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 3px;
+  width: 2px;
+  background: transparent;
+  transition: background var(--duration-micro) var(--ease-standard);
+}
+
+.resizer:hover::after,
+.resizing .resizer::after {
+  background: var(--accent);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2) var(--space-3);
+  font-size: var(--text-body);
+  font-weight: 600;
+}
+
+.brandText {
+  font-family: var(--font-editorial);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.brandText {
+  font-family: var(--font-editorial);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.paw {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-raised);
+}
+
+.brandText {
+  font-family: var(--font-editorial);
+  font-size: var(--text-brand);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.005em;
+  white-space: nowrap;
+  /* Instrument Serif ships regular-only, so the weight is synthesised. Keeping
+     the stroke small preserves the high-contrast serif shapes instead of
+     smearing them into a blunt sans. */
+  -webkit-text-stroke: 0.55px currentColor;
+  paint-order: stroke fill;
+  /* Instrument Serif sits small next to the paw; nudge it to optical size. */
+  transform: translateY(1px);
+}
+
+.collapseButton {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  margin-left: auto;
+  flex-shrink: 0;
+  color: var(--muted-foreground);
+  border-radius: var(--radius-sm);
+  transition:
+    color var(--duration-micro) var(--ease-standard),
+    background var(--duration-micro) var(--ease-standard);
+}
+
+.collapseButton:hover {
+  color: var(--foreground);
+  background: var(--sidebar-hover);
+}
+
+.primary {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.newItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  margin-bottom: 2px;
+  padding: var(--space-2);
+  color: var(--foreground);
+  font-size: var(--text-body);
+  font-weight: 500;
+  white-space: nowrap;
+  background: var(--sidebar-active);
+  border-radius: var(--radius-md);
+  transition: background var(--duration-micro) var(--ease-standard);
+}
+
+.newItem:hover {
+  background: var(--sidebar-hover);
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2);
+  color: var(--foreground-secondary);
+  font-size: var(--text-body);
+  white-space: nowrap;
+  border-radius: var(--radius-md);
+  transition:
+    background var(--duration-micro) var(--ease-standard),
+    color var(--duration-micro) var(--ease-standard);
+}
+
+.item:hover {
+  color: var(--foreground);
+  background: var(--sidebar-hover);
+}
+
+.itemActive {
+  color: var(--foreground);
+  font-weight: 500;
+  background: var(--sidebar-active);
+}
+
+.label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.item :global(svg),
+.newItem :global(svg) {
+  color: var(--muted-foreground);
+}
+
+.itemActive :global(svg) {
+  color: var(--accent);
+}
+
+/* ---- Chat history ----
+   Its own scroll region between the nav and the profile menu, so a long list of
+   threads cannot push the menu off the bottom of the rail. `min-height: 0` is
+   what lets the flex child actually shrink and scroll rather than growing the
+   sidebar. */
+
+.history {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  margin-top: var(--space-4);
+  padding-inline: var(--space-2);
+}
+
+/* Label on the left, settings on the right, both on one baseline. The toggle is
+   the label itself: a heading that is also the control is one target rather than
+   two, and the chevron says which way it goes. */
+.historyHead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding-inline: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.historyToggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-1) 0;
+  color: var(--muted-foreground);
+  font-size: var(--text-small);
+  text-align: left;
+  border-radius: var(--radius-sm);
+  transition: color var(--duration-micro) var(--ease-standard);
+}
+
+.historyToggle:hover {
+  color: var(--foreground);
+}
+
+/* Rotated rather than swapped, so the rotation itself is the state. */
+.historyChevron {
+  flex-shrink: 0;
+  transition: transform var(--duration-micro) var(--ease-standard);
+}
+
+.historyChevronOpen {
+  transform: rotate(90deg);
+}
+
+.historyHeading {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.historyList {
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.historyRow {
+  position: relative;
+}
+
+/* An open menu has to paint over the rows beneath it, including rows that are
+   themselves the target of a later hover. */
+.historyRowOpen {
+  z-index: 20;
+}
+
+.historyItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2);
+  color: var(--foreground-secondary);
+  font-size: var(--text-body);
+  border-radius: var(--radius-sm);
+  transition:
+    background var(--duration-micro) var(--ease-standard),
+    color var(--duration-micro) var(--ease-standard);
+}
+
+/* The row itself is not the link any more: the three-dot button has to be a
+   sibling of it, because a button inside an anchor is invalid and would be
+   unreachable by keyboard. This carries the shape the row used to have, and the
+   link fills it so the whole of the text stays clickable. */
+.historyLink {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.historyItem:hover {
+  color: var(--foreground);
+  background: var(--sidebar-hover);
+}
+
+.historyItemActive {
+  color: var(--foreground);
+  background: var(--sidebar-active);
+}
+
+/* Withheld until the row is hovered, or anything inside it takes focus — so the
+   keyboard reaches it even though the eye cannot, and a row that is being
+   operated on always shows what it is operating on. */
+.historyMore {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  margin: -4px 0;
+  padding: 0;
+  color: var(--muted-foreground);
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  opacity: 0;
+  transition:
+    opacity var(--duration-micro) var(--ease-standard),
+    background var(--duration-micro) var(--ease-standard),
+    color var(--duration-micro) var(--ease-standard);
+}
+
+.historyRow:hover .historyMore,
+.historyRow:focus-within .historyMore,
+.historyRowOpen .historyMore {
+  opacity: 1;
+}
+
+.historyMore:hover {
+  color: var(--foreground);
+  background: var(--sidebar-active);
+}
+
+/* No hover on a touch screen, so a row whose only affordance appears on hover
+   would have no affordance at all. */
+@media (hover: none) {
+  .historyMore {
+    opacity: 1;
+  }
+}
+
+/* A 6px ring rather than a filled dot: hollow reads as "not selected" at a
+   glance even before the background changes, so the active row is legible from
+   either signal alone. */
+.historyDot {
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  opacity: 0.45;
+  transition:
+    background var(--duration-micro) var(--ease-standard),
+    opacity var(--duration-micro) var(--ease-standard);
+}
+
+.historyItemActive .historyDot {
+  background: currentColor;
+  opacity: 1;
+}
+
+.historyTitle {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.historyEmpty {
+  padding: 0 var(--space-2);
+  color: var(--muted-foreground);
+  font-size: var(--text-small);
+}
+
+.historyPin {
+  flex-shrink: 0;
+  opacity: 0.75;
+}
+
+.historyRename {
+  width: 100%;
+  padding: var(--space-2);
+  font: inherit;
+  font-size: var(--text-body);
+  line-height: 1.3;
+  color: var(--foreground);
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  outline: none;
+}
+
+.historyRename:focus {
+  border-color: var(--foreground-secondary);
+}
+
+/* --- chat menu --- */
+
+.menu {
+  position: absolute;
+  top: calc(100% + 2px);
+  right: var(--space-2);
+  z-index: 30;
+  min-width: 186px;
+  padding: 6px;
+  background: var(--surface-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-popover);
+}
+
+/* The history list clips its own overflow, so a menu drawn below a row near the
+   end of it would be cut off. Flipped above the row instead: the row is at the
+   bottom precisely so there is room up there. */
+.menuUp {
+  top: auto;
+  bottom: calc(100% + 2px);
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 7px 8px;
+  font: inherit;
+  font-size: var(--text-small);
+  color: var(--foreground-secondary);
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition:
+    background var(--duration-micro) var(--ease-standard),
+    color var(--duration-micro) var(--ease-standard);
+}
+
+.menuItem:hover {
+  color: var(--foreground);
+  background: var(--sidebar-hover);
+}
+
+.menuItem:focus-visible {
+  outline: 2px solid var(--foreground);
+  outline-offset: -2px;
+}
+
+.menuIcon {
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.menuLabel {
+  flex: 1;
+}
+
+.menuGroup {
+  position: relative;
+}
+
+.menuChevron {
+  margin-left: auto;
+  opacity: 0.5;
+  transition: transform var(--duration-micro) var(--ease-standard);
+}
+
+.menuChevronOpen {
+  transform: rotate(90deg);
+}
+
+/* Opens beside the parent item rather than beneath it, so opening a submenu
+   never pushes the items below it out of the way — the menu you were aiming at
+   stays where it was. */
+.submenu {
+  position: absolute;
+  top: -6px;
+  left: calc(100% + 4px);
+  min-width: 132px;
+  padding: 6px;
+  background: var(--surface-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-popover);
+}
+
+.submenuEmpty {
+  display: block;
+  padding: 6px 8px;
+  font-size: var(--text-small);
+  color: var(--muted-foreground);
+  white-space: nowrap;
+}
+
+.menuSeparator {
+  height: 1px;
+  margin: 5px 4px;
+  background: var(--border);
+}
+
+.menuItemDanger {
+  color: var(--danger);
+}
+
+.menuItemDanger:hover {
+  color: var(--danger);
+  background: var(--sidebar-hover);
+}
+
+.footer {
+  margin-top: auto;
+  padding-top: var(--space-2);
+  border-top: 0.5px solid var(--material-border);
+}

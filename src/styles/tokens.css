@@ -1,0 +1,221 @@
+/* Pawzz design tokens — source: Pawzz_Master_UI_UX_Design_Specification.md §5–§14 */
+
+:root {
+  color-scheme: light;
+
+  /* Color — light theme */
+  --background: #f8f7f3;
+  --surface: #fcfbf8;
+  --surface-elevated: #ffffff;
+  --surface-subtle: #f3f1ec;
+
+  --foreground: #191714;
+  --foreground-secondary: #45413b;
+  /* Display cut: the greeting's specified near-white, ink on light. */
+  --foreground-display: #191714;
+  --muted-foreground: #716d65;
+  --placeholder: #9b968d;
+  /* Text drawn on a --foreground fill, e.g. the send button. */
+  --foreground-inverse: #fcfbf8;
+
+  --border: #e7e3dc;
+  --border-subtle: #eeebe3;
+  --border-strong: #d9d4cb;
+
+  --accent: #c9785b;
+  --accent-hover: #d58a6c;
+  --accent-soft: #f1ddd4;
+  --accent-foreground: #ffffff;
+
+  --success: #5c806a;
+  --warning: #a57a45;
+  --danger: #b85c57;
+  /* A solid fill for the one button that has to be a target rather than a
+     label. --danger is tuned as text on a surface, where it only has to be
+     legible; filled, it reads as a muddy chip. These are the same hue dropped
+     for contrast, and they are only ever a background. */
+  --danger-fill: #c33d31;
+  --danger-fill-hover: #ad3328;
+  --danger-fill-foreground: #ffffff;
+  --info: #667b91;
+
+  --sidebar: #f4f2ed;
+  --sidebar-hover: #ece9e2;
+  --sidebar-active: #e7e3dc;
+
+  --code-background: #f0eee9;
+
+  /* ---- Syntax ----
+     A snippet is read as structure, not as prose: a reader is looking for the
+     shape of the code, and the fastest way to see it is hue on the token type.
+     The interface palette cannot do that job — it has one accent and four
+     status colours, which puts keywords, strings, numbers and types on the same
+     handful of near-identical hues, and a highlighted block comes out looking
+     like the same grey text with a few words tinted.
+
+     So this is a palette of its own, held to the same rules as everything else:
+     every value is legible against `--code-background` in its own theme, and
+     nothing here is used outside a code block. Six hues, chosen for separation
+     around the wheel rather than for decoration, so token type is
+     distinguishable at a glance without reading the text.
+     Hues: plum, green, amber, blue, rust, violet. */
+  --syntax-comment: #6f6a61;
+  --syntax-keyword: #8f3a63;
+  --syntax-string: #2f6b46;
+  --syntax-number: #8a5310;
+  --syntax-func: #2a5a86;
+  --syntax-type: #8a3a25;
+  --syntax-const: #63468a;
+  --syntax-punct: #4a463f;
+
+  /* Translucent "material" layers. macOS only blurs where a surface sits over
+     content — the sidebar and workbench — never across the whole window. */
+  --material: rgb(250 249 246 / 0.72);
+  --material-border: rgb(0 0 0 / 0.08);
+  --material-blur: saturate(180%) blur(20px);
+
+  /* Typography — Geist if present, otherwise the platform's own UI face */
+  --font-sans: "Geist Sans", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI",
+    system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
+  /* Must go through the next/font variable, not the family name directly.
+     next/font defines --font-cormorant on <html> and ships the @font-face
+     against it; naming the family here would silently fall back to Georgia,
+     because the token never resolves to the loaded face. */
+  --font-editorial: var(--font-cormorant, "Cormorant Garamond"), Georgia,
+    "Times New Roman", serif;
+  /* Display cut for large one-off lines (the greeting). Prefers the sharper
+     grotesque or display faces each platform ships, so the letterforms stay
+     crisp rather than falling back to the text weight everywhere. */
+  --font-display: "SF Pro Display", "Segoe UI Variable Display", Inter, Cantarell,
+    "Helvetica Neue", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+
+  --text-page: 30px;
+  --text-section: 22px;
+  --text-subsection: 17px;
+  --text-chat: 16px;
+  --text-body: 15px;
+  --text-small: 13px;
+  --text-caption: 12px;
+  --text-code: 13px;
+  --text-brand: 21px;
+
+  --leading-body: 1.55;
+  --leading-tight: 1.3;
+
+  /* Spacing — 4px base grid */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-composer: 22px;
+
+  /* Motion */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --duration-micro: 140ms;
+  --duration-normal: 220ms;
+  --duration-workspace: 360ms;
+
+  /* Shell */
+  --sidebar-width: 260px;
+  --sidebar-width-collapsed: 68px;
+  --workbench-width: 480px;
+  --reading-width: 780px;
+  --composer-width: 720px;
+
+  /* Z-index — spec §138 */
+  --z-base: 0;
+  --z-sticky: 100;
+  --z-sidebar: 200;
+  --z-workbench: 300;
+  --z-overlay: 400;
+  --z-modal: 500;
+  --z-toast: 600;
+
+  /* Depth — hairline hierarchy, never a floating card with a giant shadow.
+     --focus-ring resolves against whichever --accent is active, so it needs a
+     value in only one place. */
+  --shadow-window: 0 1px 2px rgb(0 0 0 / 0.06), 0 8px 24px rgb(0 0 0 / 0.08);
+  --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.04);
+  --shadow-popover: 0 0 0 0.5px var(--material-border), 0 8px 28px rgb(0 0 0 / 0.12);
+  --focus-ring: 0 0 0 3px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+.dark {
+  color-scheme: dark;
+
+  --background: #151515;
+  /* Nudged warm to stay in family with the canvas rather than reading as a
+     neutral grey card dropped onto it. */
+  --surface: #201f1e;
+  --surface-elevated: #262523;
+  --surface-subtle: #1b1a19;
+
+  --foreground: #f5f3ee;
+  --foreground-secondary: #d6d2ca;
+  --foreground-display: #f0efec;
+  --muted-foreground: #a5a099;
+  --placeholder: #7d7871;
+  --foreground-inverse: #191714;
+
+  --border: #3a3835;
+  --border-subtle: #302e2b;
+  --border-strong: #4a4744;
+
+  --accent: #d0896c;
+  --accent-hover: #dd9a80;
+  --accent-soft: #3d2a22;
+  --accent-foreground: #1c1b19;
+
+  --success: #7ba389;
+  --warning: #c39a63;
+  --danger: #d17772;
+  --danger-fill: #c0453e;
+  --danger-fill-hover: #d0524a;
+  --danger-fill-foreground: #fcfbf8;
+  --info: #8299b1;
+
+  /* A flat, slightly recessed panel: one step darker than the canvas, so the
+     navigation reads as behind the work rather than beside it. Hover and active
+     are small lifts off this base, not the much lighter steps a #232221 base
+     needed. */
+  --sidebar: #111111;
+  --sidebar-hover: #1c1b1a;
+  --sidebar-active: #262523;
+
+  --code-background: #1a1917;
+
+  /* Syntax, dark. The same six hues as the light theme, lightened rather than
+     swapped: on a near-black block a saturated mid-tone is unreadable, and the
+     hue relationships have to survive being raised in luminance or the types
+     stop being tellable apart. */
+  --syntax-comment: #8d8779;
+  --syntax-keyword: #e08cb8;
+  --syntax-string: #85c99c;
+  --syntax-number: #e0b264;
+  --syntax-func: #7fb6e6;
+  --syntax-type: #e69878;
+  --syntax-const: #b295e2;
+  --syntax-punct: #a5a099;
+
+  --material: rgb(35 34 33 / 0.72);
+  --material-border: rgb(255 255 255 / 0.09);
+
+  /* Shadows carry more weight against a dark surface, or they disappear. */
+  --shadow-window: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px rgb(0 0 0 / 0.24);
+  --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.3);
+  --shadow-popover: 0 0 0 0.5px var(--material-border), 0 8px 28px rgb(0 0 0 / 0.5);
+}
+

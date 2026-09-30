@@ -1,0 +1,13 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  overflow: auto;
+}
+
+/* A pinned surface does not scroll. See the note on the `pinned` prop. */
+.page[data-pinned="true"] {
+  overflow: hidden;
+}

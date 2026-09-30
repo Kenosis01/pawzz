@@ -1,0 +1,60 @@
+/* Mark beside the line, not above it. Stacked, the pair read as a logo over a
+   caption; side by side they read as one thing saying hello. */
+.greeting {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  /* Matches the composer's own 40rem column so the two read as one unit. */
+  width: 100%;
+  max-width: 40rem;
+  padding-inline: 0.5rem;
+}
+
+.mark {
+  flex-shrink: 0;
+}
+
+.line {
+  min-width: 0;
+  /* Cormorant Garamond 500, matching the title and assistant replies. The face
+     is small on the body of each letter, so it needs a touch more size and
+     slightly looser tracking than a grotesque would to read as intentional. */
+  font-family: var(--font-editorial);
+  /* 52px on a 62px line, weight 500 — the empty state's only text, so it is
+     sized to be read across the room rather than scanned. */
+  font-size: 3.25rem;
+  font-weight: 500;
+  line-height: 3.875rem;
+  letter-spacing: -0.015em;
+  color: var(--foreground-display);
+  text-wrap: balance;
+  animation: line-in 420ms var(--ease-standard) 60ms both;
+}
+
+@keyframes line-in {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+}
+
+@media (max-width: 30rem) {
+  .greeting {
+    gap: var(--space-3);
+  }
+
+  /* The display cut is fluid so a long greeting still fits a narrow window;
+     the line-height follows it so the leading stays proportional. */
+  .line {
+    font-size: clamp(2rem, 9vw, 3.25rem);
+    line-height: 1.18;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .line {
+    animation: none;
+  }
+}

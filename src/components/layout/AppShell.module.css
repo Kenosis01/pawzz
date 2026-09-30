@@ -1,0 +1,52 @@
+.shell {
+  display: flex;
+  height: 100%;
+  background: var(--background);
+}
+
+.main {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  /* Hidden, not auto, and this is the fix for the composer riding up the screen.
+
+     `main` is a layout container: it holds whichever surface is routed, and that
+     surface decides what scrolls. Letting `main` scroll as well meant a chat
+     transcript — which scrolls itself — also made the whole page taller, so
+     scrolling pushed the docked prompt box up and off the top while the page
+     kept going. The inner surface clipping its own overflow does not stop an
+     ancestor from counting that overflow, so the page scrolled regardless of
+     what the surface did, and the prompt went with it.
+
+     A surface that genuinely needs to scroll sets that itself. */
+  overflow: hidden;
+}
+
+/* Sits directly on the plain workspace background — no card, no fill. */
+.reopen {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
+  z-index: var(--z-sticky);
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  color: var(--muted-foreground);
+  border-radius: var(--radius-sm);
+  animation: reopen-in var(--duration-normal) var(--ease-standard);
+  transition: color var(--duration-micro) var(--ease-standard);
+}
+
+.reopen:hover {
+  color: var(--foreground);
+}
+
+@keyframes reopen-in {
+  from {
+    opacity: 0;
+    transform: translateX(-4px);
+  }
+}

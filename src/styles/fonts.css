@@ -1,0 +1,8 @@
+/*
+ * No bundled faces.
+ *
+ * Pawzz used to ship Instrument Serif for the wordmark. The wordmark, the
+ * greeting and assistant replies are all set in Cormorant Garamond now, which
+ * next/font fetches, subsets and self-hosts at build time — strictly better than
+ * a hand-placed woff2, and it means dropping a file changes nothing.
+ */
