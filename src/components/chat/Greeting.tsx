@@ -16,7 +16,7 @@ import styles from "./Greeting.module.css";
  * thing the user just turned on, and the empty state is the only place to say
  * it in full.
  */
-export function Greeting() {
+export function Greeting({ left = false }: { left?: boolean }) {
   // Resolved after mount so the first paint is not locked to a stale name.
   const [line, setLine] = useState("");
   const { on: incognito } = useIncognito();
@@ -27,7 +27,7 @@ export function Greeting() {
   }, [incognito]);
 
   return (
-    <div className={styles.greeting}>
+    <div className={styles.greeting} data-align={left ? "left" : undefined}>
       <PawzzMark size={52} className={styles.mark} />
       <h1 className={styles.line}>{incognito ? "You’re incognito" : line}</h1>
     </div>

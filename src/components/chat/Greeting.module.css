@@ -6,6 +6,12 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-4);
+  /* Work mode asks for the pair at the left edge of the prompt box rather than
+     centred — a workspace has a starting corner, a chat does not. Attribute
+     rather than a second class so the two variants cannot drift apart. */
+  &[data-align="left"] {
+    justify-content: flex-start;
+  }
   /* The composer's own 40rem column, so the two read as one unit — and, more
      to the point, so the greeting and the prompt box it sits above have the
      same width. A greeting wider than the box under it looks like a title bar.

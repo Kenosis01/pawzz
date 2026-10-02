@@ -1,0 +1,89 @@
+/* Empty work state.
+
+   Left-aligned where chat is centred: a workspace has a starting corner, and
+   the greeting, prompt box and suggestions below it read as one column set
+   against that corner rather than a block floating in the middle of the page.
+   `max-width` matches the chat dock's 40rem so the two empty states share one
+   measure — the same prompt box, only its company differs. */
+.stage {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  gap: var(--space-5);
+  min-height: 0;
+  width: 100%;
+  max-width: 40rem;
+  /* The composer module reads this as its own width cap; set here rather than
+     re-declared there, because this is the only container the empty state has. */
+  --cmp-max: 40rem;
+  margin-inline: auto;
+  /* Lifted above true centre like the chat dock, so the column reads as sitting
+     in the upper-middle rather than marooned near the bottom edge. */
+  padding: var(--space-4) var(--space-4) clamp(var(--space-12), 18vh, 11rem);
+}
+
+/* ---- Suggestions ----
+   Plain text separated by hairlines, not pills. A pill is a button, and a
+   suggestion that looks like a button promises a click; text under a small
+   icon reads as an invitation to type instead. Separated by lines rather than
+   floating as loose items so the column has a rhythm to it — four suggestions
+   with nothing between them are a list with no order. */
+.suggestions {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.suggestion {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 2.75rem;
+  padding-inline: var(--space-1);
+  color: var(--foreground-secondary);
+  font-size: var(--text-body);
+  line-height: 1.4;
+  /* The separators are half-tones of the border, not the border itself: a full
+     hairline between each row reads as a table, and a suggestion column is not
+     tabular data. The first row has no rule above it — the prompt box already
+     ends in an edge, and doubling it reads as one crowded seam. */
+  border-bottom: 0.5px solid var(--material-border);
+}
+
+.suggestion:last-child {
+  border-bottom: 0;
+}
+
+.suggestionIcon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+  color: var(--muted-foreground);
+  /* The quiet tile behind the icon. Hairline-edged rather than filled, so the
+     icon reads as drawn rather than stamped — a filled chip on every row is
+     the chrome this column is meant to avoid. */
+  border: 0.5px solid var(--material-border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-subtle);
+}
+
+.suggestionText {
+  min-width: 0;
+}
+
+@media (max-width: 30rem) {
+  .suggestion {
+    min-height: 2.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Nothing animates here yet; the block exists so the rule is in place if one
+     ever does. */
+}
