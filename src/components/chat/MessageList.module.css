@@ -307,14 +307,19 @@
 
 /* Assistant: full-width prose, the primary reading column. Set in the editorial
    face, one size up from the interface type — a long answer in a UI face reads as
-   a form, and this is the part of the product someone actually reads. */
+   a form, and this is the part of the product someone actually reads.
+
+   The face comes from `--pawzz-chat-font`, which the Chat font control in
+   General writes. It falls back to the editorial face, so the reply is in
+   Source Serif 4 until someone picks something else — which is the same thing
+   the hardcoded value said, and now it is a default rather than a constant. */
 .row[data-role="assistant"] .text {
   /* Matches the composer's docked width, so the reply and the prompt it is
      answering share one measure. A narrower reply inside a wider prompt box
      reads as two unrelated columns. */
   max-width: 46rem;
   color: var(--foreground);
-  font-family: var(--font-response), Georgia, serif;
+  font-family: var(--pawzz-chat-font, var(--font-response)), Georgia, serif;
   /* 400 rather than 500: Source Serif 4's regular already has the colour of a
      text face, and 500 on top of it lands on 600 and makes the reply look
      emphasised throughout. */

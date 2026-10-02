@@ -675,7 +675,7 @@ Honest accounting of where Pawzz is not yet what this document describes.
 
 **Settings**
 - The registry lists six sections, all six reachable. Privacy, Shortcuts, and About were once listed; they are now **removed from the registry** rather than 404ing, and their components are still on disk but unreachable. Appearance folded into General, with `/settings/appearance` kept as a redirect so old links resolve. Whether the unreachable components get rebuilt or deleted is open.
-- `PrivacySection` references `styles.group` and `styles.buttonDanger`, **neither of which exists** in the stylesheet. The section has therefore never been visually validated. Its `ALL_KEYS` list is also short by three keys the app now writes — `pawzz.memory.md`, `pawzz.motion`, and `pawzz.models.enabled.v1` — so a "clear all" through that screen would leave them behind.
+- `PrivacySection` references `styles.group` and `styles.buttonDanger`, **neither of which exists** in the stylesheet. The section has therefore never been visually validated. Its `ALL_KEYS` list is also short by five keys the app now writes — `pawzz.memory.md`, `pawzz.motion`, `pawzz.chat-font`, `pawzz.transcript-width` and `pawzz.models.enabled.v1` — so a "clear all" through that screen would leave them behind.
 - A `border-left` accent rule in `SettingsPage.module.css` is **dead** — nothing selects it.
 
 **Naming**

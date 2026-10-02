@@ -4,7 +4,6 @@ import { useEffect, useState, type CSSProperties } from "react";
 
 import { MonitorIcon, MoonIcon, SunIcon } from "../../../components/icons/Icons";
 import { Select } from "../../../components/ui/Select";
-import { SquishSwitch } from "../../../components/ui/SquishSwitch";
 import { useTheme } from "../../../lib/theme";
 import styles from "../SettingsPage.module.css";
 
@@ -29,26 +28,6 @@ function useStored(key: string, initial: string): [string, (v: string) => void] 
   return [value, set];
 }
 
-function useStoredBool(key: string, initial: boolean): [boolean, (v: boolean) => void] {
-  const [value, setValue] = useState(initial);
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(key);
-      if (stored !== null) setValue(stored === "1");
-    } catch {
-      // Keep default.
-    }
-  }, [key]);
-  const set = (next: boolean) => {
-    setValue(next);
-    try {
-      localStorage.setItem(key, next ? "1" : "0");
-    } catch {
-      // Ignore.
-    }
-  };
-  return [value, set];
-}
 
 const CHAT_FONTS = [
   { value: "geist-sans", label: "Geist Sans", stack: "var(--font-sans)" },
@@ -64,12 +43,6 @@ export function GeneralSection() {
   const [chatFont, setChatFont] = useStored("pawzz.chat-font", "geist-sans");
   const [width, setWidth] = useStored("pawzz.transcript-width", "narrow");
   const [motion, setMotion] = useStored("pawzz.motion", "system");
-  const [voiceLang, setVoiceLang] = useStored("pawzz.voice-lang", "English");
-  const [voiceStyle, setVoiceStyle] = useStored("pawzz.voice-style", "Buttery");
-  const [voiceSpeed, setVoiceSpeed] = useStored("pawzz.voice-speed", "Normal");
-  const [notify, setNotify] = useStoredBool("pawzz.notify-completions", false);
-
-
 
   useEffect(() => {
     try {
@@ -86,10 +59,16 @@ export function GeneralSection() {
         "--reading-width",
         widths[width] ?? "640px",
       );
+      /* Reduced motion is two things, and only doing the first is how this
+         control would have looked done and not been. Each component's own
+         `prefers-reduced-motion` block still covers the OS setting; this class
+         is the manual override, and it has to sit on an ancestor of the whole
+         app or it reaches nothing. */
+      document.documentElement.classList.toggle("reduce-motion", motion === "reduced");
     } catch {
       // Ignore.
     }
-  }, [chatFont, width]);
+  }, [chatFont, width, motion]);
 
   const themeIndex = Math.max(0, THEME_ORDER.indexOf(theme));
 
@@ -155,62 +134,6 @@ export function GeneralSection() {
       >
         <Segment options={["System", "Reduced"]} value={motion} onChange={setMotion} />
       </Row>
-
-      <h2 className={styles.title}>Voice</h2>
-
-      <Row label="Language">
-        <Select
-          className={styles.select}
-          value={voiceLang}
-          onChange={setVoiceLang}
-          ariaLabel="Voice language"
-          options={["English", "Spanish", "French", "German", "Japanese"].map(
-            (l) => ({ value: l, label: l }),
-          )}
-        />
-      </Row>
-
-      <Row label="Style">
-        <Select
-          className={styles.select}
-          value={voiceStyle}
-          onChange={setVoiceStyle}
-          ariaLabel="Voice style"
-          options={["Buttery", "Crisp", "Warm", "Bright"].map((s) => ({
-            value: s,
-            label: s,
-          }))}
-        />
-      </Row>
-
-      <Row label="Speed">
-        <Select
-          className={styles.select}
-          value={voiceSpeed}
-          onChange={setVoiceSpeed}
-          ariaLabel="Voice speed"
-          options={["Slow", "Normal", "Fast"].map((s) => ({
-            value: s,
-            label: s,
-          }))}
-        />
-      </Row>
-
-      <h2 className={styles.title}>Notifications</h2>
-
-      <Row
-        label="Response completions"
-        hint="Notify when a response finishes. Useful for long tasks."
-      >
-        <SquishSwitch
-          checked={notify}
-          onChange={setNotify}
-          ariaLabel="Response completion notifications"
-          width={36}
-          height={20}
-        />
-      </Row>
-
     </div>
   );
 }

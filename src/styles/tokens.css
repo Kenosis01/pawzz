@@ -132,7 +132,12 @@
   --sidebar-width: 260px;
   --sidebar-width-collapsed: 68px;
   --workbench-width: 480px;
-  --reading-width: 780px;
+  /* 640 rather than 780: the Transcript width control in General defaults to
+     Narrow, and the two defaults have to agree. When the token said 780 the
+     first paint was 780px wide and then snapped to 640px once the control read
+     storage — a visible reflow for a setting the user had never touched. The
+     control rewrites this variable on `:root` at runtime. */
+  --reading-width: 640px;
   --composer-width: 720px;
 
   /* Z-index — spec §138 */
