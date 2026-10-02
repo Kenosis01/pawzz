@@ -1,5 +1,5 @@
-import { AccountPage } from "~/screens/settings";
+import { GeneralSection } from "~/screens/settings/sections/GeneralSection";
 
 export default function Page() {
-  return <AccountPage />;
+  return <GeneralSection />;
 }

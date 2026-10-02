@@ -1,139 +1,147 @@
 "use client";
 
-import {
-  BlocksIcon,
-  BotIcon,
-  DatabaseIcon,
-  SparklesIcon,
-} from "../../../components/icons/Icons";
+import Link from "next/link";
+import { useState } from "react";
+
+import { BotMark, type BotFace } from "../../../components/brand/BotMark";
+import { cn } from "../../../lib/cn";
 import styles from "../SettingsPage.module.css";
 
 /**
- * The four sections that describe a capability the PRD has specified but that has
- * no runtime behind it yet.
+ * The four bots.
  *
- * Each says what the section is for and that nothing is configured, rather than
- * rendering an empty panel. A blank settings page reads as a bug; a described
- * one reads as a roadmap. Nothing here is faked — no placeholder rows, no
- * invented numbers, no "coming soon" buttons that do nothing when pressed.
+ * An agent used to be initials on a tinted circle, and the tint was the whole
+ * of the identity: four identical dots in four colours, which reads as a
+ * swatch rather than as somebody. Each entry pairs a face with a tint from the
+ * existing status palette — an avatar must not invent colour that means
+ * something else somewhere in the app — so the row is a choice of who the
+ * agent is, and the colour comes along with it rather than being the choice.
+ *
+ * The tint ids are unchanged and still travel to Co-work as `?tint=`, so this
+ * is a change of face, not of contract.
  */
+const AVATARS = {
+  accent: "antenna",
+  success: "visor",
+  info: "pods",
+  warning: "crest",
+} as const satisfies Record<string, BotFace>;
 
-export function PlaceholderSection({
-  title,
-  sub,
-  icon,
-  body,
-}: {
-  title: string;
-  sub: string;
-  icon: React.ReactNode;
-  body: string;
-}) {
-  return (
-    <div className={styles.page}>
-      <section>
-        <h2 className={styles.heading}>{title}</h2>
-        <p className={styles.sub}>{sub}</p>
-        <p className={styles.note}>{body}</p>
+type AvatarTint = keyof typeof AVATARS;
 
-        <div className={styles.empty}>
-          <span className={styles.emptyIcon}>{icon}</span>
-          <span className={styles.emptyTitle}>Nothing configured yet</span>
-          <span className={styles.emptyBody}>
-            This section will list what you have set up. It is empty because
-            there is nothing to list, not because something failed to load.
-          </span>
-        </div>
-      </section>
-    </div>
-  );
-}
-
-export function ConnectionsSection() {
-  return (
-    <PlaceholderSection
-      title="Connections"
-      sub="Connectors and MCP servers Pawzz can reach on your behalf."
-      icon={<BlocksIcon size={18} />}
-      body={
-        "Connectors let a conversation read and write outside sources — a drive, a repository, " +
-        "a database. MCP is the same idea over a standard protocol, so one integration can serve " +
-        "both. The add menu in the prompt box already carries placeholder rows for both; they " +
-        "are inert until a server can be registered and a permission granted."
-      }
-    />
-  );
-}
-
-export function AgentsSection() {
-  return (
-    <PlaceholderSection
-      title="Agents"
-      sub="Agents Pawzz can run for you, and what each one is allowed to do."
-      icon={<BotIcon size={18} />}
-      body={
-        "An agent is a standing set of instructions, tools and permissions that runs without " +
-        "you steering every turn. Each one gets its own permission list — read-only, " +
-        "ask-before-acting, or unattended — and the states it can be in are visible at all " +
-        "times rather than inferred from whether it is answering. The Co-work routes in the " +
-        "sidebar are the surface for this."
-      }
-    />
-  );
-}
+const TINTS = Object.keys(AVATARS) as AvatarTint[];
 
 export function UsageSection() {
   return (
     <div className={styles.page}>
-      <section>
-        <h2 className={styles.heading}>Usage</h2>
-        <p className={styles.sub}>Where your time and tokens have gone.</p>
-        <p className={styles.note}>
-          This page is built around four cards — today, the last five hours,
-          this month, and what your plan allows. The figures behind them come
-          from a connected model runtime, and there is not one yet, so there is
-          nothing to chart. Showing zeroes would imply the number is real, so
-          the cards wait.
-        </p>
-
-        <div className={styles.empty}>
-          <span className={styles.emptyIcon}>
-            <DatabaseIcon size={18} />
-          </span>
-          <span className={styles.emptyTitle}>No usage to show yet</span>
-          <span className={styles.emptyBody}>
-            Once Pawzz is running against a model, this is where the cost and
-            the pace live — read as something useful rather than as a warning,
-            since the plan is generous by design.
-          </span>
-        </div>
-      </section>
-
-      <section>
-        <h2 className={styles.heading}>What counts</h2>
-        <div className={styles.shortcuts}>
-          <Row label="Per model" value="Which model ran which turn" />
-          <Row label="Per agent" value="Time attributed to each agent" />
-          <Row label="Per tool" value="Calls made on your behalf" />
-        </div>
-      </section>
+      <h2 className={styles.heading}>Usage</h2>
+      <p className={styles.sub}>Where your time and tokens have gone.</p>
+      <p className={styles.empty}>
+        No usage to show yet. Figures appear once a model runtime is connected.
+      </p>
+      <div className={styles.shortcuts}>
+        <Row label="Per model" value="Turns by model" />
+        <Row label="Per agent" value="Time by agent" />
+        <Row label="Per tool" value="Calls made" />
+      </div>
     </div>
   );
 }
 
 export function SubscriptionSection() {
   return (
-    <PlaceholderSection
-      title="Subscription"
-      sub="Your plan, and what changes with it."
-      icon={<SparklesIcon size={18} />}
-      body={
-        "A plan affects model access, agent limits and how much runs unattended. None of that " +
-        "is active, so there is no plan to show and nothing to change. Every capability Pawzz " +
-        "has today runs without one."
-      }
-    />
+    <div className={styles.page}>
+      <h2 className={styles.heading}>Subscription</h2>
+      <p className={styles.sub}>Your plan, and what changes with it.</p>
+      <p className={styles.empty}>
+        No plan yet. Everything available today runs without one.
+      </p>
+    </div>
   );
+}
+
+export function AgentsSection() {
+  const [name, setName] = useState("");
+  const [tint, setTint] = useState<AvatarTint>("accent");
+  const [about, setAbout] = useState("");
+
+  const face = AVATARS[tint];
+
+  return (
+    <div className={styles.page}>
+      <h2 className={styles.heading}>Agents</h2>
+      <p className={styles.sub}>
+        Create an agent that works for you in Co-work.
+      </p>
+
+      <div className={styles.agentPreview}>
+        <span className={styles.agentMark} data-tint={tint} aria-hidden="true">
+          <BotMark face={face} size={30} />
+        </span>
+        <span className={styles.agentPreviewName}>
+          {name.trim() || "Your agent"}
+        </span>
+      </div>
+
+      <div className={styles.defaultRow}>
+        <input
+          type="text"
+          className={styles.textInput}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Agent name, e.g. Research Buddy"
+          aria-label="Agent name"
+          maxLength={40}
+        />
+        <textarea
+          className={styles.textInput}
+          value={about}
+          onChange={(e) => setAbout(e.target.value)}
+          placeholder="What should this agent do? One or two lines."
+          rows={3}
+          aria-label="Agent description"
+        />
+        <div
+          className={styles.tintRow}
+          role="radiogroup"
+          aria-label="Agent bot"
+        >
+          {TINTS.map((t) => (
+            <button
+              key={t}
+              type="button"
+              role="radio"
+              aria-checked={tint === t}
+              aria-label={`${AVATARS[t]} bot`}
+              className={styles.tint}
+              data-tint={t}
+              onClick={() => setTint(t)}
+            >
+              <BotMark face={AVATARS[t]} size={20} />
+            </button>
+          ))}
+        </div>
+        <Link
+          href={
+            name.trim()
+              ? `/cowork/agents/new?name=${encodeURIComponent(name.trim())}&tint=${tint}`
+              : "/cowork/agents/new"
+          }
+          className={cn(styles.button, styles.buttonSmall)}
+        >
+          Create your Agent
+        </Link>
+      </div>
+      <p className={styles.note}>
+        Opens in Co-work where permissions and runs live.
+      </p>
+    </div>
+  );
+}
+
+// Keep old names working for any stray import.
+export function ConnectionsSection() {
+  return null;
 }
 
 function Row({ label, value }: { label: string; value: string }) {

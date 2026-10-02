@@ -114,6 +114,16 @@ export function MoonIcon({ size, className }: IconProps) {
   );
 }
 
+export function MonitorIcon({ size, className }: IconProps) {
+  return (
+    <Svg size={size} className={className}>
+      <rect width="18" height="14" x="3" y="3" rx="2" />
+      <path d="M8 21h8" />
+      <path d="M12 17v4" />
+    </Svg>
+  );
+}
+
 export function PanelLeftCloseIcon({ size, className }: IconProps) {
   return (
     <Svg size={size} className={className}>
@@ -137,6 +147,14 @@ export function PanelLeftOpenIcon({ size, className }: IconProps) {
 export function ChevronUpIcon({ size, className }: IconProps) {  return (
     <Svg size={size} className={cn(styles.chevron, className)}>
       <path d="m18 15-6-6-6 6" />
+    </Svg>
+  );
+}
+
+/** ChevronUp flipped. Both are needed: a disclosure shows one or the other. */
+export function ChevronDownIcon({ size, className }: IconProps) {  return (
+    <Svg size={size} className={cn(styles.chevron, className)}>
+      <path d="m6 9 6 6 6-6" />
     </Svg>
   );
 }

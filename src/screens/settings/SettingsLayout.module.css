@@ -1,44 +1,211 @@
-.layout {
+.backdrop {
   display: flex;
-  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
   flex: 1;
   min-height: 0;
+  overflow: auto;
+  padding: var(--space-8) var(--space-4);
 }
 
-.body {
+.dialog {
+  position: relative;
   display: flex;
+  width: 100%;
+  max-width: 880px;
+  min-height: 560px;
+  max-height: calc(100vh - 96px);
+  margin: auto;
+  background: var(--surface-elevated);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-window);
+  overflow: hidden;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 210px;
+  flex-shrink: 0;
+  padding: var(--space-4);
+  background: var(--surface-subtle);
+  border-right: 0.5px solid var(--border-subtle);
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  color: var(--muted-foreground);
+  background: var(--surface-elevated);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.searchInput {
   flex: 1;
-  min-height: 0;
+  min-width: 0;
+  background: none;
+  border: none;
+  outline: none;
+  font-size: var(--text-small);
+  color: var(--foreground);
+}
+
+.searchInput::placeholder {
+  color: var(--placeholder);
+}
+
+.groupLabel {
+  margin-top: var(--space-2);
+  padding: 0 var(--space-2);
+  color: var(--muted-foreground);
+  font-size: var(--text-caption);
 }
 
 .nav {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  width: 200px;
-  flex-shrink: 0;
-  padding: var(--space-4);
 }
 
 .navItem {
-  padding: var(--space-2);
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  padding: var(--space-2) var(--space-3);
   color: var(--foreground-secondary);
   font-size: var(--text-small);
+  font-weight: 500;
   border-radius: var(--radius-sm);
 }
 
 .navItem:hover {
-  background: var(--surface-subtle);
+  background: var(--sidebar-hover);
 }
 
+/* The active section is a filled row, not an orange rule down its left edge.
+   The rule drew a line of brand colour next to a list of quiet text, and the
+   line was louder than the selection it was marking. */
 .navItemActive {
   color: var(--foreground);
+  font-weight: 600;
   background: var(--sidebar-active);
+}
+
+.noMatch {
+  padding: var(--space-2) var(--space-3);
+  color: var(--muted-foreground);
+  font-size: var(--text-small);
+}
+
+.main {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.close {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-4);
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  color: var(--muted-foreground);
+  font-size: 14px;
+  border-radius: var(--radius-sm);
+}
+
+.close:hover {
+  color: var(--foreground);
+  background: var(--surface-subtle);
 }
 
 .content {
   flex: 1;
-  min-width: 0;
+  min-height: 0;
   overflow: auto;
-  border-left: 0.5px solid var(--material-border);
+  padding: var(--space-6) var(--space-8) var(--space-8);
+}
+
+/* A writing page fills this column rather than scrolling inside it: no padding
+   (the editor brings its own measure and gutters) and no second scroller. */
+.contentBleed {
+  overflow: hidden;
+  padding: 0;
+}
+
+@media (max-width: 720px) {
+  .dialog {
+    flex-direction: column;
+    max-height: none;
+  }
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 0.5px solid var(--border-subtle);
+  }
+}
+
+/* Below 720px the dialog stacks: nav across the top, content below. The content
+   column's own 620px cap is dropped there too — it was capped for the two-column
+   layout, and inside a stacked layout it just leaves a dead right margin on a
+   400px screen. */
+@media (max-width: 40rem) {
+  .backdrop {
+    padding: 0;
+  }
+
+  .dialog {
+    max-width: none;
+    max-height: none;
+    min-height: 100%;
+    border-radius: 0;
+    border: none;
+  }
+
+  .sidebar {
+    /* Horizontal scroller rather than a stacked block: six sections stacked
+       vertically would push the content below the fold on every visit. */
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-1);
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+    border-right: none;
+    border-bottom: 0.5px solid var(--border-subtle);
+  }
+
+  .sidebar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .search {
+    flex-shrink: 0;
+  }
+
+  .groupLabel {
+    display: none;
+  }
+
+  .nav {
+    flex-direction: row;
+    gap: var(--space-1);
+  }
+
+  .navItem {
+    white-space: nowrap;
+  }
+
+  .content {
+    padding: var(--space-4);
+  }
 }

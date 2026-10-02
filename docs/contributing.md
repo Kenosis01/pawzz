@@ -70,9 +70,10 @@ Read these before opening a file for the first time; they are load-bearing.
 - **Never read storage during render.** There is no storage on the server, so a
   first render that disagrees with the client is a hydration mismatch. Read it in
   an effect and start from a fixed default.
-- If you add a key, add it to the table in `docs/architecture.md`, to
-  `ALL_KEYS` in `src/screens/settings/sections/PrivacySection.tsx`, and bump the
-  `.v1` suffix if the *shape* changes.
+- If you add a key, add it to the table in `docs/architecture.md` and bump the
+  `.v1` suffix if the *shape* changes. `ALL_KEYS` in `PrivacySection.tsx` is a
+  copy of that table — it is currently out of date and the section is no longer
+  reachable, so do not treat it as the source.
 
 ### The chat runtime — the two rules that keep it fast
 

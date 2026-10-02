@@ -25,17 +25,19 @@ appear in the URL.
 | `/cowork/dashboard` | `(app)/cowork/dashboard/page.tsx` | `AgentDashboardPage` | **stub** |
 | `/cowork/agents/new` | `(app)/cowork/agents/new/page.tsx` | `AgentCreatePage` | **stub** |
 | `/cowork/agents/[agentId]` | `(app)/cowork/agents/[agentId]/page.tsx` | `AgentConversationPage` | **stub** |
-| `/settings` | `(app)/settings/page.tsx` | `redirect("/settings/models")` | — |
-| `/settings/general` | `(app)/settings/general/page.tsx` | `AccountPage` | intentionally blank |
-| `/settings/appearance` | `(app)/settings/appearance/page.tsx` | `AppearancePage` | **real** |
+| `/settings` | `(app)/settings/page.tsx` | `redirect("/settings/general")` | — |
+| `/settings/general` | `(app)/settings/general/page.tsx` | `GeneralSection` | **real** |
+| `/settings/appearance` | `(app)/settings/appearance/page.tsx` | `redirect("/settings/general")` | — |
 | `/settings/[sectionId]` | `(app)/settings/[sectionId]/page.tsx` | `SettingsSectionPage` | mixed — see below |
 | `/onboarding` | `(bare)/onboarding/page.tsx` | `WelcomePage` | **real** |
 | `/onboarding/intent` | `(bare)/onboarding/intent/page.tsx` | `IntentPage` | **real** |
 | `/shared/[shareToken]` | `(bare)/shared/[shareToken]/page.tsx` | `SharedConversationPage` | **stub** |
 | any other | `src/app/not-found.tsx` | `NotFoundPage` | **real** |
 
-The two `redirect()` pages are deliberate: `/` is the product, and
-`/settings` has no screen of its own because the sections are separate routes.
+The three `redirect()` pages are deliberate: `/` is the product, `/settings` has
+no screen of its own because the sections are separate routes, and
+`/settings/appearance` is a retired path kept working — Appearance folded into
+General rather than 404ing old links.
 
 ### `/settings/[sectionId]`
 
@@ -45,19 +47,17 @@ calls `notFound()` — a typo renders a 404, not a blank panel.
 
 | `sectionId` | Component | State |
 | --- | --- | --- |
+| `general` | `GeneralSection` | **real** |
+| `memory` | `MemorySection` | **real** |
 | `models` | `ModelsSection` | **real** |
-| `privacy` | `PrivacySection` | **real** |
-| `shortcuts` | `ShortcutsSection` | **real** |
-| `about` | `AboutSection` | **real** |
-| `connections` | `PlaceholderSections` | described placeholder |
-| `agents` | `PlaceholderSections` | described placeholder |
 | `usage` | `PlaceholderSections` | described placeholder |
 | `subscription` | `PlaceholderSections` | described placeholder |
-| `general`, `appearance` | *own routes* | excluded from the dispatch map by type |
+| `agents` | `PlaceholderSections` | described placeholder |
 
 Adding a settings section is two edits: one row in `settingsSections.ts`, one
-entry in the `SECTIONS` map in `SettingsSectionPage.tsx`. Registering `general`
-or `appearance` there is a type error, because they ship as their own routes.
+entry in the `SECTIONS` map in `SettingsSectionPage.tsx`. The map is typed
+`Record<SettingsSectionId, …>`, so a registry row with no component is a type
+error rather than a blank panel.
 
 ## Route handlers (the API)
 

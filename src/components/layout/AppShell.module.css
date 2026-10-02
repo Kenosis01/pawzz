@@ -32,8 +32,8 @@
   z-index: var(--z-sticky);
   display: grid;
   place-items: center;
-  width: 26px;
-  height: 26px;
+  width: 36px;
+  height: 36px;
   color: var(--muted-foreground);
   border-radius: var(--radius-sm);
   animation: reopen-in var(--duration-normal) var(--ease-standard);
@@ -48,5 +48,54 @@
   from {
     opacity: 0;
     transform: translateX(-4px);
+  }
+}
+
+/* ---- Responsive ----
+   Pawzz is a desktop app that has to survive being dragged narrow. The shell
+   is the only place these live: the sidebar and the workbench are separate
+   components, but it is the *sum* of their widths plus the workspace that runs
+   out of room, so the thresholds belong here where the three meet.
+
+   The workbench is the right column, so it is the first thing to go — below
+   1100px there is no width left for a readable transcript beside a 480px
+   panel, and a transcript squeezed to 400px is not a transcript. */
+@media (max-width: 1100px) {
+  .shell {
+    /* The workbench stops being a column and floats over the workspace, so it
+       costs no width until something actually opens it. The overlay rules
+       themselves live in Workbench.module.css, next to the element they
+       style — they used to be here, selected by `:last-child`, which matched
+       `<main>` whenever the workbench rendered nothing and took the whole
+       workspace out of flow. */
+    position: relative;
+  }
+}
+
+/* Below this the sidebar is unusable as a column whatever its width, because
+   the transcript underneath it would be narrower than the composer's minimum
+   comfortable measure. Collapsing it to the icon rail is the only way both
+   stay usable. */
+@media (max-width: 860px) {
+  .shell {
+    --sidebar-width: var(--sidebar-width-collapsed);
+  }
+
+  .reopen {
+    display: none;
+  }
+}
+
+/* The transcript measure is a maximum, never a target: it narrows with the
+   viewport rather than being allowed to stretch. This lives on the shell so it
+   applies to every surface — chat, cowork, design — rather than being
+   re-declared in each transcript.
+
+   The gutter shrinks alongside it: a fixed 16px side padding is a fifth of the
+   width on a 160px phone and eats the prose it is meant to frame. */
+@media (max-width: 60rem) {
+  .main {
+    --reading-width: 100%;
+    --composer-width: 100%;
   }
 }

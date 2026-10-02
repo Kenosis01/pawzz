@@ -61,11 +61,13 @@
 
 .showMore {
   align-self: flex-end;
+  min-height: 32px;
   margin-top: var(--space-2);
-  padding: var(--space-1) var(--space-2);
+  padding: var(--space-1) var(--space-3);
   color: var(--muted-foreground);
   font-family: inherit;
   font-size: var(--text-caption);
+  font-weight: 500;
   border-radius: var(--radius-sm);
   transition:
     color var(--duration-micro) var(--ease-standard),
@@ -258,13 +260,16 @@
 }
 
 .editButton {
-  padding: var(--space-1) var(--space-3);
+  min-height: 40px;
+  padding: var(--space-3) var(--space-5);
   color: var(--foreground);
   font-family: inherit;
   font-size: var(--text-small);
+  font-weight: 500;
+  line-height: 1;
   background: var(--surface-elevated);
   border: 0.5px solid var(--border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   transition:
     background var(--duration-micro) var(--ease-standard),
     color var(--duration-micro) var(--ease-standard),
@@ -302,14 +307,19 @@
 
 /* Assistant: full-width prose, the primary reading column. Set in the editorial
    face, one size up from the interface type — a long answer in a UI face reads as
-   a form, and this is the part of the product someone actually reads. */
+   a form, and this is the part of the product someone actually reads.
+
+   The face comes from `--pawzz-chat-font`, which the Chat font control in
+   General writes. It falls back to the editorial face, so the reply is in
+   Source Serif 4 until someone picks something else — which is the same thing
+   the hardcoded value said, and now it is a default rather than a constant. */
 .row[data-role="assistant"] .text {
   /* Matches the composer's docked width, so the reply and the prompt it is
      answering share one measure. A narrower reply inside a wider prompt box
      reads as two unrelated columns. */
   max-width: 46rem;
   color: var(--foreground);
-  font-family: var(--font-response), Georgia, serif;
+  font-family: var(--pawzz-chat-font, var(--font-response)), Georgia, serif;
   /* 400 rather than 500: Source Serif 4's regular already has the colour of a
      text face, and 500 on top of it lands on 600 and makes the reply look
      emphasised throughout. */
@@ -354,8 +364,8 @@
 .action {
   display: grid;
   place-items: center;
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 2rem;
+  height: 2rem;
   color: var(--muted-foreground);
   border-radius: var(--radius-sm);
   transition:
@@ -416,12 +426,22 @@
   gap: var(--space-2);
 }
 
+/* Same geometry as every other button in the app — 40px tall, 8px radius,
+   hairline border. The interruption notice is a normal state with two normal
+   actions in it, not a special one; giving it its own smaller pill made it read
+   as a system message rather than as something the user can act on. */
 .interruptedButton {
-  padding: var(--space-1) var(--space-3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: var(--space-3) var(--space-5);
   color: var(--foreground);
   font-size: var(--text-small);
   font-weight: 500;
-  background: var(--surface-elevated);
+  line-height: 1;
+  white-space: nowrap;
+  background: var(--surface-subtle);
   border: 0.5px solid var(--border);
   border-radius: var(--radius-sm);
   transition:
@@ -430,7 +450,7 @@
 }
 
 .interruptedButton:hover {
-  background: var(--surface);
+  background: var(--sidebar-hover);
   border-color: var(--border-strong);
 }
 

@@ -19,9 +19,8 @@ repository.
 | Attachments | drag-and-drop, paste (image and long text), file picker, image thumbnails | `composer/attachments.ts`, `Composer.tsx` |
 | Theming | light / dark / system, no flash, live OS changes | `theme.ts`, `layout.tsx` |
 | Onboarding | name, then intent, then into the app | `screens/onboarding/` |
-| Settings | Appearance, Models, Privacy, Shortcuts, About | `screens/settings/` |
+| Settings | General (with Appearance folded in), Memory, Models; Usage / Subscription / Agents are described placeholders | `screens/settings/` |
 | Shell | resizable collapsible sidebar, profile menu, 404 | `components/layout/` |
-| Privacy | "what is stored", individual and full reset | `PrivacySection.tsx` |
 
 ## Stubs
 
@@ -39,12 +38,8 @@ their routes in [Routes](./routes.md).
 The design workspace pages render `ArtifactWorkspaceLayout` with all three slots
 empty — the frame exists, the content does not.
 
-`/settings/general` is **intentionally** blank rather than unfinished: the section
-id is kept so the nav keeps its shape and the URL keeps resolving
-(`AccountPage.tsx`).
-
-The `SettingsSectionPage` `connections`, `agents`, `usage` and `subscription`
-sections are **described placeholders** — each explains what the section is for
+The `SettingsSectionPage` `agents`, `usage` and `subscription` sections are
+**described placeholders** — each explains what the section is for
 and states that nothing is configured. Nothing is faked: no invented numbers, no
 "coming soon" buttons that do nothing.
 
@@ -89,8 +84,7 @@ Not started, and not stubbed either. Each is a substantial piece of work.
 - **Usage / subscription / connectors / MCP / skills / plugins.** The `+` menu
   and the settings sections name them; none have a runtime.
 - **Keyboard shortcuts.** Only Enter, Shift+Enter and Escape are bound. There is
-  no global shortcut and no command palette; `ShortcutsSection.tsx` says so
-  explicitly.
+  no global shortcut and no command palette.
 - **Tests.** There is no test suite. The build plus manual smoke tests are the
   current gate.
 

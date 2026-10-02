@@ -145,3 +145,17 @@ body[data-resizing] {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* The same rule, for someone who wants less motion without changing the OS
+   setting. The Motion control in General toggles this class on <html> — it has
+   to be an ancestor of the whole app, since the animations it reaches are
+   declared on components scattered across every surface. Selecting by class
+   rather than by the media query is the only way for a user preference to get
+   at them. */
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}

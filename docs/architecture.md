@@ -97,7 +97,9 @@ convention:
 ## Data & storage
 
 Everything client-side is keyed in `localStorage` (one key in `sessionStorage`).
-The authoritative list is also encoded in `src/screens/settings/sections/PrivacySection.tsx`.
+The table below is the authoritative list. `ALL_KEYS` in
+`src/screens/settings/sections/PrivacySection.tsx` is a second copy that has
+fallen behind — it is missing the last five rows.
 
 | Key | Written by | Holds |
 | --- | --- | --- |
@@ -111,6 +113,10 @@ The authoritative list is also encoded in `src/screens/settings/sections/Privacy
 | `pawzz.thinking` | `src/lib/model-preference.ts` | `"1"` when thinking is on |
 | `pawzz.incognito` | `src/lib/incognito.tsx` | `"1"` when incognito is on |
 | `pawzz.models.enabled.v1` | `src/lib/model-catalogue-context.tsx` | JSON array of enabled model ids |
+| `pawzz.motion` | `src/screens/settings/sections/GeneralSection.tsx` | `"system"` / `"reduced"`, the motion preference |
+| `pawzz.chat-font` | `src/screens/settings/sections/GeneralSection.tsx` | which face assistant replies are set in |
+| `pawzz.transcript-width` | `src/screens/settings/sections/GeneralSection.tsx` | `narrow` / `medium` / `wide` |
+| `pawzz.memory.md` | `src/screens/settings/sections/MemorySection.tsx` | the memory document, as plain markdown |
 | `pawzz.pending.v1` *(`sessionStorage`)* | `src/lib/chat-handoff.ts` | the first prompt, during navigation to `/chat/:id` |
 
 Every read and write is wrapped in `try/catch`. Blocked or full storage degrades

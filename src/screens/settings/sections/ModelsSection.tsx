@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 
+import { Select } from "../../../components/ui/Select";
 import { SquishSwitch } from "../../../components/ui/SquishSwitch";
 import { useModelCatalogue } from "../../../lib/model-catalogue-context";
 import { useModelPreference } from "../../../lib/model-preference";
@@ -73,11 +74,6 @@ export function ModelsSection() {
       <section>
         <h2 className={styles.heading}>Default model</h2>
         <p className={styles.sub}>The model each new prompt starts on.</p>
-        <p className={styles.note}>
-          Auto is the default for a reason (PRD §3.4): most people should never
-          have to think about which model answers. Pick a specific one if you
-          want a consistent voice, or if you are comparing two on the same task.
-        </p>
 
         {/* A select, not a radio list. The enabled set is whatever the user
             chose to leave on and defaults to all 458 models, so a list of rows
@@ -85,20 +81,19 @@ export function ModelsSection() {
             switch they came for. A select is one line, and browsers filter it
             as you type. */}
         <div className={styles.defaultRow}>
-          <select
+          <Select
             className={styles.select}
             value={modelId}
-            onChange={(event) => setModelId(event.target.value)}
-            aria-label="Default model"
-          >
-            {enabled.map((model) => (
-              <option key={model.id} value={model.id}>
-                {model.id === AUTO.id
+            onChange={setModelId}
+            ariaLabel="Default model"
+            options={enabled.map((model) => ({
+              value: model.id,
+              label:
+                model.id === AUTO.id
                   ? `${model.name} — ${AUTO_DESCRIPTION}`
-                  : `${model.name} · ${model.provider}`}
-              </option>
-            ))}
-          </select>
+                  : `${model.name} · ${model.provider}`,
+            }))}
+          />
           {enabled.length === 0 ? (
             <p className={styles.rowHint}>
               Auto is the only model enabled. Switch more on below.
@@ -112,14 +107,7 @@ export function ModelsSection() {
         <p className={styles.sub}>
           {loading
             ? "Loading models…"
-            : `${enabledCount} of ${models.length} switched on. The composer offers only these.`}
-        </p>
-        <p className={styles.note}>
-          Every model OpenRouter publishes is listed here, each with a switch.
-          What you switch on is the only thing the composer&apos;s dropdown
-          shows, so it stays a shortlist instead of a directory of 458 entries.
-          Start with Auto alone and add a few; a new model released upstream
-          appears here switched off rather than landing in your dropdown.
+            : `${enabledCount} of ${models.length} on. Only these show in the composer.`}
         </p>
 
         {error ? (
@@ -141,19 +129,16 @@ export function ModelsSection() {
             aria-label="Search models"
           />
 
-          <select
+          <Select
             className={styles.select}
             value={provider}
-            onChange={(event) => setProvider(event.target.value)}
-            aria-label="Filter by provider"
-          >
-            <option value="all">All providers</option>
-            {providers.map((name) => (
-              <option key={name} value={name}>
-                {name}
-              </option>
-            ))}
-          </select>
+            onChange={setProvider}
+            ariaLabel="Filter by provider"
+            options={[
+              { value: "all", label: "All providers" },
+              ...providers.map((name) => ({ value: name, label: name })),
+            ]}
+          />
 
           <button
             type="button"
@@ -239,14 +224,7 @@ export function ModelsSection() {
 
       <section>
         <h2 className={styles.heading}>Effort</h2>
-        <p className={styles.sub}>How thoroughly a model should answer.</p>
-        <p className={styles.note}>
-          Set from the composer&rsquo;s model menu, which flies the ladder out
-          beside the catalogue. Higher effort is more thorough and slower, and
-          spends your limits faster; Max is flagged because it costs several
-          times the others. Thinking lets a model reason for longer on the hard
-          cases only.
-        </p>
+        <p className={styles.sub}>Set from the composer model menu.</p>
       </section>
     </div>
   );

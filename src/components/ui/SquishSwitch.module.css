@@ -99,9 +99,11 @@
   background: var(--ss-thumb-on);
 }
 
-/* Focus is drawn on the track, because the button itself is only as large as the
-   control and the ring is easier to see against the filled pill. */
+/* Focus is the shared ring, same as every other control. It was a hand-drawn
+   1px accent outline, which made the switch the one control in the app that
+   announced focus differently from its neighbours. */
 .switch:focus-visible .track {
+  outline: none;
   box-shadow: var(--focus-ring);
 }
 

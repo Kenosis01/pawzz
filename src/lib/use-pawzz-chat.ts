@@ -337,6 +337,13 @@ export function usePawzzChat(conversationId: string) {
     if (index < 0) return;
     const prompt = current[index];
     if (!prompt) return;
+    // The notice described the reply that is being replaced. `onFinish` will not
+    // clear it — it only clears on a turn that was not stopped, and the whole
+    // point of this path is that the previous one was — so without this the
+    // "Edit prompt / Try again" pair stayed on screen underneath the new
+    // answer, offering to redo something that had already been redone.
+    stopped.current = false;
+    setInterrupted(false);
     setMessages(current.slice(0, index));
     // The microtask is load-bearing, and it is the same guard the pending-handoff
     // path below uses for the same reason.

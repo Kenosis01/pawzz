@@ -132,7 +132,12 @@
   --sidebar-width: 260px;
   --sidebar-width-collapsed: 68px;
   --workbench-width: 480px;
-  --reading-width: 780px;
+  /* 640 rather than 780: the Transcript width control in General defaults to
+     Narrow, and the two defaults have to agree. When the token said 780 the
+     first paint was 780px wide and then snapped to 640px once the control read
+     storage — a visible reflow for a setting the user had never touched. The
+     control rewrites this variable on `:root` at runtime. */
+  --reading-width: 640px;
   --composer-width: 720px;
 
   /* Z-index — spec §138 */
@@ -145,12 +150,15 @@
   --z-toast: 600;
 
   /* Depth — hairline hierarchy, never a floating card with a giant shadow.
-     --focus-ring resolves against whichever --accent is active, so it needs a
-     value in only one place. */
+     --focus-ring is a thin neutral hairline in the surface's own ink, not an
+     accent glow. It was 3px of 40%-opacity terracotta, which put a soft orange
+     halo around every focused field, tab and select in the app — a glow reads
+     as AI-generated chrome and competes with whatever it is highlighting.
+     Focus is still unmistakable: a dark ring at hairline weight. */
   --shadow-window: 0 1px 2px rgb(0 0 0 / 0.06), 0 8px 24px rgb(0 0 0 / 0.08);
   --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.04);
   --shadow-popover: 0 0 0 0.5px var(--material-border), 0 8px 28px rgb(0 0 0 / 0.12);
-  --focus-ring: 0 0 0 3px color-mix(in srgb, var(--accent) 40%, transparent);
+  --focus-ring: 0 0 0 1px var(--foreground);
 }
 
 .dark {
