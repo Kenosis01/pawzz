@@ -61,11 +61,13 @@
 
 .showMore {
   align-self: flex-end;
+  min-height: 32px;
   margin-top: var(--space-2);
-  padding: var(--space-1) var(--space-2);
+  padding: var(--space-1) var(--space-3);
   color: var(--muted-foreground);
   font-family: inherit;
   font-size: var(--text-caption);
+  font-weight: 500;
   border-radius: var(--radius-sm);
   transition:
     color var(--duration-micro) var(--ease-standard),
@@ -258,13 +260,16 @@
 }
 
 .editButton {
-  padding: var(--space-1) var(--space-3);
+  min-height: 40px;
+  padding: var(--space-3) var(--space-5);
   color: var(--foreground);
   font-family: inherit;
   font-size: var(--text-small);
+  font-weight: 500;
+  line-height: 1;
   background: var(--surface-elevated);
   border: 0.5px solid var(--border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   transition:
     background var(--duration-micro) var(--ease-standard),
     color var(--duration-micro) var(--ease-standard),
@@ -354,8 +359,8 @@
 .action {
   display: grid;
   place-items: center;
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 2rem;
+  height: 2rem;
   color: var(--muted-foreground);
   border-radius: var(--radius-sm);
   transition:
@@ -416,12 +421,22 @@
   gap: var(--space-2);
 }
 
+/* Same geometry as every other button in the app — 40px tall, 8px radius,
+   hairline border. The interruption notice is a normal state with two normal
+   actions in it, not a special one; giving it its own smaller pill made it read
+   as a system message rather than as something the user can act on. */
 .interruptedButton {
-  padding: var(--space-1) var(--space-3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: var(--space-3) var(--space-5);
   color: var(--foreground);
   font-size: var(--text-small);
   font-weight: 500;
-  background: var(--surface-elevated);
+  line-height: 1;
+  white-space: nowrap;
+  background: var(--surface-subtle);
   border: 0.5px solid var(--border);
   border-radius: var(--radius-sm);
   transition:
@@ -430,7 +445,7 @@
 }
 
 .interruptedButton:hover {
-  background: var(--surface);
+  background: var(--sidebar-hover);
   border-color: var(--border-strong);
 }
 

@@ -70,9 +70,9 @@
   left: 50%;
   display: grid;
   place-items: center;
-  width: 2rem;
-  height: 2rem;
-  margin: calc(-2rem) auto 0;
+  width: 36px;
+  height: 36px;
+  margin: -36px auto 0;
   color: var(--foreground-secondary);
   background: var(--surface-elevated);
   border: 0.5px solid var(--border);

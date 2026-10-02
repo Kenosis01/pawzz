@@ -1,19 +1,16 @@
 /**
- * Settings section registry. Data-only: the nav and the route table both read
- * from this. `appearance` is the one section with a real page; the rest render
- * an empty surface until they are built.
+ * Settings section registry. Data-only: the dialog sidebar and the route table
+ * both read from this. Memory is its own section rather than a block inside
+ * General — it is a document the user writes in, not a preference they toggle,
+ * and a textarea squeezed into a settings row cannot be either.
  */
 export const settingsSections = [
   { id: "general", label: "General" },
-  { id: "appearance", label: "Appearance" },
+  { id: "memory", label: "Memory" },
   { id: "models", label: "Models" },
-  { id: "connections", label: "Connections" },
-  { id: "agents", label: "Agents" },
   { id: "usage", label: "Usage" },
   { id: "subscription", label: "Subscription" },
-  { id: "privacy", label: "Privacy" },
-  { id: "shortcuts", label: "Keyboard shortcuts" },
-  { id: "about", label: "About" },
+  { id: "agents", label: "Agents" },
 ] as const;
 
 export type SettingsSectionId = (typeof settingsSections)[number]["id"];

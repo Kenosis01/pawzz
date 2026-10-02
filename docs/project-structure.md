@@ -82,10 +82,10 @@ src/app/
 │   ├── search/page.tsx        global search               [stub]
 │   └── settings/
 │       ├── layout.tsx         SettingsLayout — section nav
-│       ├── page.tsx           "/settings" → redirect("/settings/models")
-│       ├── general/page.tsx   → AccountPage (deliberately blank)
-│       ├── appearance/page.tsx → AppearancePage (real)
-│       └── [sectionId]/page.tsx → SettingsSectionPage (dispatches 8 sections)
+│       ├── page.tsx           "/settings" → redirect("/settings/general")
+│       ├── general/page.tsx   → GeneralSection (real)
+│       ├── appearance/page.tsx → redirect("/settings/general")
+│       └── [sectionId]/page.tsx → SettingsSectionPage (dispatches 6 sections)
 ├── (bare)/                    outside the app shell
 │   ├── layout.tsx             renders children bare
 │   ├── onboarding/
@@ -135,10 +135,10 @@ See [Routes](./routes.md) for the full URL table including every HTTP verb.
 | --- | --- | --- |
 | `chat/` | `Composer.tsx`, `MessageList.tsx`, `Markdown.tsx`, `Widget.tsx`, `ChatHeader.tsx`, `Greeting.tsx` | the conversation surface |
 | `chat/composer/` | `attachments.ts`, `AttachmentTray.tsx`, `ModelPicker.tsx`, `PlusMenu.tsx`, `SendSlot.tsx` | the controls around the prompt box |
-| `layout/` | `AppShell.tsx`, `Sidebar.tsx`, `Workbench.tsx`, `Page.tsx`, `ProfileMenu.tsx`, `ChatRowMenu.tsx`, `RenameField.tsx` | the persistent shell |
-| `ui/` | `ConfirmDialog.tsx`, `SquishSwitch.tsx` | generic controls |
+| `layout/` | `AppShell.tsx`, `Sidebar.tsx`, `ModeSwitch.tsx`, `Workbench.tsx`, `Page.tsx`, `ProfileMenu.tsx`, `ChatRowMenu.tsx`, `RenameField.tsx` | the persistent shell |
+| `ui/` | `ConfirmDialog.tsx`, `Select.tsx`, `SquishSwitch.tsx` | generic controls |
 | `icons/` | `Icons.tsx` | the whole icon set (Lucide geometry, animated in CSS) |
-| `brand/` | `PawzzMark.tsx` | the logo mark |
+| `brand/` | `BotMark.tsx`, `PawzzMark.tsx` | the logo mark and the agent faces |
 | `design/` | `ArtifactWorkspaceLayout.tsx` | three-region editor frame for the design workspaces |
 
 Each component has a sibling `*.module.css`. See
@@ -149,7 +149,7 @@ Each component has a sibling `*.module.css`. See
 | Folder | Real screens | Stubs |
 | --- | --- | --- |
 | `chat/` | `NewChatPage`, `ConversationPage` | — |
-| `settings/` | `SettingsLayout`, `SettingsSectionPage`, `AppearancePage`, `AccountPage`, and `sections/{ModelsSection, PrivacySection, ShortcutsSection, AboutSection, PlaceholderSections}` | `general` is intentionally blank |
+| `settings/` | `SettingsLayout`, `SettingsSectionPage`, and `sections/{GeneralSection, MemorySection, ModelsSection, PlaceholderSections}` | `usage`, `subscription` and `agents` are placeholders |
 | `onboarding/` | `OnboardingLayout`, `WelcomePage`, `IntentPage` | — |
 | `projects/` | `ProjectLayout` | `ProjectsPage`, `ProjectSectionPage` |
 | `design/` | — | `DesignPage`, `DocumentWorkspacePage`, `PresentationWorkspacePage`, `WebsiteWorkspacePage` |

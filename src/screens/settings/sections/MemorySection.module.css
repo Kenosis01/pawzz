@@ -1,0 +1,812 @@
+/* Memory — a writing page, not a settings panel.
+
+   The editor IS the page. There is deliberately no container around it: no
+   border, no fill, no inset card. A full-height box with a hairline around the
+   text reads as a *field* that happens to be tall, and every element of that
+   reading — the border, the radius, the background — has to be removed before
+   it reads as a document you are writing in. What replaces it is the measure:
+   a column of text with the same inset on every side as the rest of Settings,
+   and nothing else.
+
+   Crepe's own layout stylesheet is NOT imported here. See MarkdownEditor. */
+
+.page {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+/* The only chrome: what the document is, and whether it has been written.
+   A single quiet line, sitting above the text rather than in a bar of its own,
+   so the page opens with the document rather than with an interface. */
+.crumbs {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  flex-shrink: 0;
+  /* Matches the editor's own gutter, so the label above the text and the text
+     itself start on the same line.
+
+     Left-aligned, and nothing right-aligned in this row: the settings layout
+     floats its close button over the top-right of this column, and a
+     right-aligned entry count sat underneath the X. Padding a clear space out
+     of the right edge would fix the overlap and break the gutter match above,
+     so the row keeps both of its parts on the left where the text starts. */
+  width: 100%;
+  max-width: 46rem;
+  margin-inline: auto;
+  padding: var(--space-5) var(--space-6) var(--space-4);
+}
+
+.crumbLabel {
+  font-size: var(--text-small);
+  font-weight: 600;
+  color: var(--foreground-secondary);
+}
+
+.crumbMeta {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  color: var(--muted-foreground);
+  font-size: var(--text-caption);
+}
+
+/* The write state. Terracotta soft rather than the accent: it is a status, not
+   an invitation to press anything. */
+.crumbDot {
+  color: var(--muted-foreground);
+  transition: color var(--duration-micro) var(--ease-standard);
+}
+
+.crumbDot::before {
+  content: "· ";
+}
+
+/* The page itself. No border, no background, no radius — the only thing that
+   distinguishes it from the dialog behind it is the measure and the caret. */
+.doc {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+/* The measure. 46rem is the assistant reply's measure: memory is read as prose,
+   so it is set at the same width a reply is. Overflow scrolls here so the page
+   below it never moves. */
+.editor {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  /* The writing measure. 46rem matches an assistant reply — this is a document
+     someone reads, so it gets the document's width. */
+  max-width: 46rem;
+  margin-inline: auto;
+  /* Side gutters belong here now: the content column gave up its padding so the
+     page is flush with the dialog, and the measure has to be inset from the
+     dialog's own edge or the text touches it. */
+  padding: 0 var(--space-6) var(--space-16);
+}
+
+/* The retheme.
+
+   Crepe ships its own palette as CSS variables on `.milkdown` — a cold grey
+   and blue that has nothing to do with Pawzz's warm ivory. Overriding the
+   variables rather than the rules is the supported seam: Crepe's own CSS reads
+   them everywhere, so nothing has to be fought with `!important`, and a
+   Crepe upgrade that adds a component picks up the theme for free.
+
+   `--font-mono` for the body is a real change, not a carry-over. The old
+   textarea was monospaced because it showed you markdown source; this editor
+   shows you the rendered document, so a monospaced body would make a heading
+   look like code. Body text is the sans the rest of the app uses, with the
+   editorial face reserved for headings, where it reads as a document title
+   rather than as a label.
+
+   `:global()` is load-bearing on every selector in this block and below.
+   Crepe injects its own `milkdown` class into the DOM at runtime; there is no
+   `styles.milkdown` in the TSX to hash, and without `:global()` the compiler
+   rewrites this to `.editor__hash .milkdown__hash` — which matches nothing,
+   because the live element is a bare `milkdown`. The rules silently do nothing
+   and Crepe's cold grey-and-blue palette renders instead. Every descendant
+   rule here (headings, list items, the checkbox) has the same requirement. */
+.editor :global(.milkdown) {
+  --crepe-color-background: var(--surface);
+  --crepe-color-on-background: var(--foreground);
+  --crepe-color-surface: var(--surface-elevated);
+  --crepe-color-surface-low: var(--surface-subtle);
+  --crepe-color-on-surface: var(--foreground);
+  --crepe-color-on-surface-variant: var(--foreground-secondary);
+  --crepe-color-outline: var(--muted-foreground);
+  --crepe-color-primary: var(--accent);
+  --crepe-color-secondary: var(--accent-soft);
+  --crepe-color-on-secondary: var(--accent-foreground);
+  --crepe-color-inverse: var(--foreground);
+  --crepe-color-on-inverse: var(--surface);
+  --crepe-color-inline-code: var(--accent);
+  --crepe-color-error: var(--danger);
+  --crepe-color-hover: var(--sidebar-hover);
+  --crepe-color-selected: var(--accent-soft);
+  --crepe-color-inline-area: var(--border-strong);
+
+  --crepe-base-font-size: var(--text-body);
+  --crepe-font-default: var(--font-sans);
+  --crepe-font-title: var(--font-editorial);
+  --crepe-font-code: var(--font-mono);
+
+  /* Crepe's shadows are opaque blacks tuned for a white page. Pawzz's are
+     alpha-based and already themed, so the editor's popovers match the rest of
+     the app rather than being the only thing on screen with a hard drop. */
+  --crepe-shadow-1: var(--shadow-raised);
+  --crepe-shadow-2: var(--shadow-popover);
+}
+
+/* The editable surface itself.
+
+   ProseMirror renders a `.ProseMirror` element inside `.milkdown`, and it is
+   that inner element — not the wrapper `.editor` — that is scrollable and
+   focusable, so the measure and the padding have to reach it. */
+.editor :global(.milkdown) {
+  height: 100%;
+  overflow-y: auto;
+  caret-color: var(--foreground);
+}
+
+.editor :global(.milkdown .ProseMirror) {
+  /* Not `outline: none`: ProseMirror is a focusable contenteditable, and a
+     visible focus ring around a whole document is noise on a page the user
+     clicks once and types in for minutes. The caret is the focus indicator
+     here. ProseMirror adds `.ProseMirror-focused`; nothing else needs it. */
+  outline: none;
+  /* Same reasoning, for the ring Crepe paints the focused surface with: a 1px
+     `--foreground`-coloured shadow-box around the entire document. In light mode
+     that is a hard black rectangle around the page and the document reads as a
+     locked field; in dark mode it is invisible, so the same control looked
+     broken in one theme and dead in the other. It is the one thing standing
+     between this page and looking like a document rather than a text input. */
+  box-shadow: none;
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: 1.7;
+}
+
+/* Headings.
+
+   Pawzz's editorial face for titles, sized off the token scale rather than
+   Crepe's. A `# ` in a memory file is a section of a document the user is
+   writing, not a page title, so h1 is kept close to the body size — this is a
+   document with sections, not a report with a cover. */
+.editor :global(.milkdown h1) {
+  font-family: var(--font-editorial);
+  font-size: 1.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+  margin: var(--space-6) 0 var(--space-3);
+}
+
+.editor :global(.milkdown h2) {
+  font-family: var(--font-editorial);
+  font-size: 1.4rem;
+  font-weight: 600;
+  line-height: 1.25;
+  margin: var(--space-5) 0 var(--space-2);
+}
+
+.editor :global(.milkdown h3) {
+  font-family: var(--font-sans);
+  font-size: var(--text-chat);
+  font-weight: 600;
+  line-height: 1.3;
+  margin: var(--space-4) 0 var(--space-2);
+}
+
+/* A first heading at the top of an empty document should not be pushed down by
+   its own top margin — it would sit oddly far below the crumb line. */
+.editor :global(.milkdown > h1:first-child),
+.editor :global(.milkdown > h2:first-child),
+.editor :global(.milkdown > h3:first-child) {
+  margin-top: 0;
+}
+
+/* Prose elements Crepe leaves at browser defaults, which do not survive being
+   put next to Pawzz's type: an underlined link is not Pawzz, and a default
+   blockquote margin pushes the measure out of alignment. */
+.editor :global(.milkdown p) {
+  margin: 0 0 var(--space-3);
+}
+
+.editor :global(.milkdown a) {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.editor :global(.milkdown blockquote) {
+  margin: 0 0 var(--space-3);
+  padding-left: var(--space-4);
+  color: var(--foreground-secondary);
+  border-left: 2px solid var(--border-strong);
+}
+
+.editor :global(.milkdown code) {
+  padding: 0.1em 0.35em;
+  color: var(--foreground);
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: var(--surface-subtle);
+  border-radius: var(--radius-sm);
+}
+
+.editor :global(.milkdown pre) {
+  margin: 0 0 var(--space-3);
+  padding: var(--space-3);
+  overflow-x: auto;
+  background: var(--surface-subtle);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.editor :global(.milkdown pre code) {
+  padding: 0;
+  background: none;
+}
+
+/* The task checkbox.
+
+   Not an `<input type="checkbox">`. Crepe draws the checkbox as an inline SVG
+   through a `renderLabel` callback, so there is no form element to target —
+   the markup is `.label-wrapper > .milkdown-icon > svg`, and the checked state
+   is a class (`checked` / `unchecked`) on the icon span, not a `:checked`
+   pseudo-class. The icons themselves are passed in from `MarkdownEditor`, since
+   an SVG's fill cannot be set from here.
+
+   What is left to style is the box the checkbox sits in: it needs to be a hit
+   target you can actually click, aligned to the first line of the label, and
+   it should not be a contenteditable hole in the middle of an editable
+   document. */
+.editor :global(.milkdown .list-item .label-wrapper) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin-top: 1px;
+  cursor: pointer;
+  user-select: none;
+  /* Crepe marks this `contenteditable="false"` already; stated here so the
+     reason survives someone "simplifying" the attribute away. */
+  -webkit-user-drag: none;
+}
+
+.editor :global(.milkdown .list-item .label-wrapper:hover) {
+  background: var(--sidebar-hover);
+  border-radius: var(--radius-sm);
+}
+
+/* The icon is a span wrapping the SVG. Sized here rather than inline so the
+   two states cannot drift apart, and so the tick lands on the same optical
+   centre as the empty box. */
+.editor :global(.milkdown .list-item .milkdown-icon) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  color: var(--foreground-secondary);
+  transition:
+    background var(--duration-micro) var(--ease-standard),
+    color var(--duration-micro) var(--ease-standard);
+}
+
+.editor :global(.milkdown .list-item .label-wrapper:hover .milkdown-icon) {
+  color: var(--foreground);
+}
+
+/* The checked box is terracotta; unchecked is the muted foreground it inherits
+   above. Orange is a fill here and never an outline, which is the same rule the
+   rest of the app follows — the empty box is a hairline, not a brand-coloured
+   one. */
+.editor :global(.milkdown .list-item .milkdown-icon.checked) {
+  color: var(--accent);
+}
+
+/* The icons themselves declare no fill, because they were written to inherit
+   the text colour. Crepe sets `fill: var(--crepe-color-outline)` on the SVG
+   they sit in, and it is inherited by every shape inside it — so the box drawn
+   as a stroke with no fill of its own came out a solid grey one, and the
+   filled state lost its terracotta to the same rule. Reset at the root, where
+   inheritance picks it up, and let the one state that wants a fill opt back in
+   by targeting it. */
+.editor :global(.milkdown .list-item .milkdown-icon svg) {
+  fill: none;
+}
+
+.editor :global(.milkdown .list-item .milkdown-icon.checked svg rect) {
+  fill: currentColor;
+}
+
+/* A done task steps back but stays legible. Not faded to a quarter: this
+   document is a list of things the user is going to act on, and half-faded
+   text is hard to re-read when they come back to it. */
+.editor :global(.milkdown .list-item:has(.milkdown-icon.checked) .children) {
+  color: var(--muted-foreground);
+}
+
+/* One row: checkbox, then the text beside it.
+
+   The gap is the single declaration that makes it read as a task list at all.
+   `li` still has `display: list-item` and its own `::marker` — not suppressed
+   — and in flex layout a `::marker` falls back to rendering as a real box,
+   which is where the second, Phantom bullet came from. A checkbox with a
+   bullet in front of it looks like the page has lost track of what a list is;
+   `list-style: none` is what gives the checkbox the marker slot to itself. */
+.editor :global(.milkdown .milkdown-list-item-block li) {
+  list-style: none;
+  gap: var(--space-3);
+  align-items: flex-start;
+}
+
+.editor :global(.milkdown .list-item .children) {
+  min-width: 0;
+  flex: 1;
+}
+
+/* Import, at the bottom right of the page.
+
+   A low-key control rather than a filled button: it sits in the corner of a
+   document the user is writing, and a solid accent block in the corner of a
+   page of prose pulls the eye off the writing. It is a text button with a
+   hairline until hovered.
+
+   Its geometry is the same one every other button on this page uses —
+   --radius-sm and the font the dialog sets — because it is the same control.
+   It was --radius-md, which was the only thing making it read as a different
+   product from the dialog it opens. */
+.importFab {
+  position: absolute;
+  right: 0;
+  bottom: var(--space-2);
+  z-index: var(--z-sticky);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 32px;
+  padding: var(--space-2) var(--space-4);
+  color: var(--foreground-secondary);
+  font-family: inherit;
+  font-size: var(--text-small);
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  background: var(--surface-elevated);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-popover);
+  transition:
+    background var(--duration-micro) var(--ease-standard),
+    border-color var(--duration-micro) var(--ease-standard),
+    color var(--duration-micro) var(--ease-standard);
+}
+
+.importFab:hover {
+  color: var(--foreground);
+  background: var(--sidebar-hover);
+  border-color: var(--border-strong);
+}
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-modal) + 1);
+  display: grid;
+  place-items: center;
+  padding: var(--space-5);
+  background: rgb(0 0 0 / 0.32);
+  backdrop-filter: blur(6px) saturate(120%);
+  animation: scrim-in var(--duration-normal) var(--ease-standard) both;
+}
+
+@keyframes scrim-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.dialog {
+  width: 100%;
+  max-width: 560px;
+  max-height: min(720px, calc(100vh - 80px));
+  overflow: auto;
+  padding: var(--space-5);
+  background: var(--surface-elevated);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-window);
+  animation: dialog-in var(--duration-normal) var(--ease-standard) both;
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+}
+
+.dialogHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.dialogTitle {
+  font-size: var(--text-section);
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.dialogClose {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  margin: -2px -4px 0 0;
+  color: var(--muted-foreground);
+  border-radius: var(--radius-sm);
+  transition:
+    color var(--duration-micro) var(--ease-standard),
+    background var(--duration-micro) var(--ease-standard);
+}
+
+.dialogClose:hover {
+  color: var(--foreground);
+  background: var(--surface-subtle);
+}
+
+/* ---- Steps ---- */
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+  padding: 0;
+  list-style: none;
+  counter-reset: none;
+}
+
+.step {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.stepNum {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  color: var(--muted-foreground);
+  font-size: var(--text-caption);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  border: 0.5px solid var(--border);
+  border-radius: 50%;
+}
+
+.stepBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.stepLabel {
+  display: block;
+  font-size: var(--text-body);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* ---- Prompt box ---- */
+
+/* The prompt box.
+   Collapsed it is a single row the user clicks to expand; expanded it is a
+   fixed-height scroller. Never `resize` — a drag handle on a box the user only
+   opens to read is a control for a one-time decision. */
+.promptBox {
+  margin-top: var(--space-2);
+  background: var(--surface-subtle);
+  border: 0.5px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+/* Collapsed row: the whole strip is the toggle, so there is no small chevron
+   to aim at. */
+.promptToggle {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3);
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--duration-micro) var(--ease-standard);
+}
+
+.promptToggle:hover {
+  background: var(--sidebar-hover);
+}
+
+.promptPreview {
+  flex: 1;
+  min-width: 0;
+  color: var(--foreground-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  line-height: 1.6;
+}
+
+.promptChevron {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--muted-foreground);
+}
+
+/* Expanded body: a fixed-height scroller.
+
+   The height is fixed rather than content-driven because the prompt is ~30
+   lines. Let it grow to its full height and the dialog becomes a wall of
+   markdown that pushes the paste step — the actual point of the dialog —
+   below the fold, and the dialog itself has to scroll. */
+.promptBody {
+  position: relative;
+  max-height: 220px;
+  overflow-y: auto;
+  padding: var(--space-3);
+}
+
+/* The bottom edge fades rather than cutting the last line in half. The fade is
+   the box's own surface colour, and it is a sibling of the text so it can never
+   cover a selection. */
+.promptBody::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2.5rem;
+  pointer-events: none;
+  background: linear-gradient(to bottom, transparent, var(--surface-subtle) 78%);
+}
+
+.promptText {
+  margin: 0;
+  padding: 0;
+  color: var(--foreground-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  background: none;
+  border: none;
+}
+
+.promptActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-top: 0.5px solid var(--border-subtle);
+}
+
+/* ---- Paste area ---- */
+
+.pasteArea {
+  width: 100%;
+  margin-top: var(--space-2);
+  padding: var(--space-3);
+  color: var(--foreground);
+  font-family: var(--font-mono);
+  font-size: var(--text-code);
+  line-height: 1.6;
+  background: var(--surface-subtle);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-md);
+  outline: none;
+  resize: vertical;
+  transition: border-color var(--duration-micro) var(--ease-standard);
+}
+
+.pasteArea::placeholder {
+  color: var(--placeholder);
+}
+
+.pasteArea:focus {
+  border-color: var(--border-strong);
+}
+
+/* ---- Dialog actions ---- */
+
+.dialogActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: 0.5px solid var(--border-subtle);
+}
+
+/* ---- Buttons ----
+   Three weights, one geometry. The interruption in the transcript, a settings
+   row, and a dialog action are the same control at different emphasis; they
+   should never read as three different products. */
+
+.primary,
+.secondary,
+.textButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 40px;
+  padding: var(--space-3) var(--space-5);
+  font-size: var(--text-small);
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  border-radius: var(--radius-sm);
+  transition:
+    background var(--duration-micro) var(--ease-standard),
+    border-color var(--duration-micro) var(--ease-standard),
+    color var(--duration-micro) var(--ease-standard),
+    opacity var(--duration-micro) var(--ease-standard);
+}
+
+.primary {
+  color: var(--accent-foreground);
+  background: var(--accent);
+  /* Transparent, so swapping to the disabled state's hairline below does not
+     change the button's box by half a pixel. */
+  border: 0.5px solid transparent;
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.secondary {
+  color: var(--foreground);
+  background: var(--surface-subtle);
+  border: 0.5px solid var(--border);
+}
+
+.secondary:hover:not(:disabled) {
+  background: var(--sidebar-hover);
+  border-color: var(--border-strong);
+}
+
+.secondary:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* A disabled *primary* goes neutral rather than fading.
+
+   Terracotta at 0.4 opacity is a muddy orange that still reads as "press me" —
+   it sat next to the input looking broken rather than unavailable. A disabled
+   primary is not a dimmer primary, it is a different control: the muted fill
+   and hairline say "not yet", and it becomes the accent again the moment there
+   is something to add. */
+.primary:disabled {
+  color: var(--muted-foreground);
+  background: var(--surface-subtle);
+  border: 0.5px solid var(--border);
+  opacity: 1;
+  cursor: default;
+}
+
+/* Destructive-adjacent, but not a filled danger button: clearing memory is
+   recoverable from an export, and a red fill would overstate it.
+
+   It is in the shared geometry block above rather than declaring its own — this
+   rule used to stand alone and so missed the flex centring, which is why
+   "Clear all" sat a few pixels off the same row as Save next to it. */
+.textButton {
+  color: var(--muted-foreground);
+}
+
+.textButton:hover:not(:disabled) {
+  color: var(--danger);
+  background: var(--surface-subtle);
+}
+
+.textButton:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* ---- Screen-reader only ---- */
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scrim,
+  .dialog {
+    animation: none;
+  }
+}
+
+/* ---- Responsive ----
+   The dialog is a fixed 560px on a wide screen, but the *settings dialog behind
+   it* is what constrains it: below the settings dialog's own 720px breakpoint
+   the content column collapses, and this dialog has to not reintroduce the
+   width it lost. `max-width: 100%` on a flex/grid parent already handles the
+   box; these are the two things it does not handle — the fixed-height prompt
+   scroller and the step numbering.
+
+   The step number is a 20px circle in a flex row, so at a narrow width the
+   label beside it is the first thing to give up its margin. */
+@media (max-width: 34rem) {
+  .dialog {
+    padding: var(--space-4);
+  }
+
+  /* The full prompt is ~30 lines. At this height it would be four screens of
+     scrolling inside a dialog that already scrolls, so it is shorter and leans
+     on its own scroller. */
+  .promptBody {
+    max-height: 160px;
+  }
+
+  .step {
+    gap: var(--space-2);
+  }
+
+  .dialogActions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .dialogActions > * {
+    width: 100%;
+  }
+}
+
+/* The writing page at narrow widths.
+
+   The measure already caps at 46rem and the gutters already collapse with the
+   column, so there is nothing to restructure — the page is a single text field
+   and a text field is the one thing that is responsive for free. What does need
+   help is the chrome around it: the gutter tightens so the text keeps its room,
+   and the import button stops floating over the last line of the document. */
+@media (max-width: 34rem) {
+  .editor,
+  .crumbs {
+    padding-inline: var(--space-4);
+  }
+
+  /* The FAB is absolutely positioned over the page's bottom-right. On a narrow
+     window that is where the caret is, so it gets a solid background (it has
+     one) and is inset far enough to clear the gutter. */
+  .importFab {
+    right: var(--space-3);
+    bottom: var(--space-3);
+  }
+}

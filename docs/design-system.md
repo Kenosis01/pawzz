@@ -213,3 +213,114 @@ block.
 3. If it is one a widget could reasonably need, add it to `readHostTokens` in
    `src/lib/widget.ts` and to the widget's `THEME_CSS` mapping.
 4. Check the change in both themes and at the sidebar's minimum width (200px).
+
+## Global constraints (non-negotiable)
+
+These apply to every surface, including any pattern adapted from outside
+references:
+
+1. **No emojis, anywhere.** Status, tool activity, empty states, and menus use
+   text plus Lucide glyphs from `src/components/icons/Icons.tsx`. Never an
+   emoji character in UI, copy examples, or spec diagrams.
+2. **Flat hierarchy — no containers in containers.** One surface level per view.
+   A card never sits inside another card, a panel never inside a panel, a dialog
+   never inside a popover. Use hairline-separated rows, sections, or sibling
+   bands instead of nesting. If a design needs emphasis, change the sibling
+   band's token (e.g. `--surface-subtle`), do not wrap it in another box.
+3. **Pawzz theme only.** Every color resolves to a `var(--token)` from
+   `src/styles/tokens.css`. No outside hex values.
+4. **Pawzz typography only.** Interface `--font-sans` (Geist Sans), code
+   `--font-mono` (Geist Mono), editorial `--font-editorial` (Cormorant
+   Garamond), replies `--font-response` (Source Serif 4). No outside faces.
+
+## Adapted structural patterns (Claude reference, Pawzz-themed)
+
+Source of the structure: the Claude.com editorial system supplied for this
+task. Only structure, sizing, and spacing are ported below. Colors and
+typefaces are **not** ported — each row maps to the Pawzz token on the right.
+
+### What is copied vs. what is not
+
+| Claude idea | Copied? | Pawzz mapping |
+| --- | --- | --- |
+| Button sizes, heights, padding, radius | yes | `--radius-sm`, 40px min-height, `var(--space-3) var(--space-5)` padding |
+| Card padding rhythm (32px standard, 24px compact) | yes | `--space-8`, `--space-6` |
+| Section rhythm 96px between marketing bands | yes, marketing only | `--space-16` + breathing room; app surfaces stay on the 4px grid |
+| Radius hierarchy (controls < cards < large surfaces < pills) | yes | `--radius-sm` / `--md` / `--lg` / `--xl` / pill 999px |
+| Border-first elevation, shadow-rare | yes (already Pawzz §13) | hairline borders, `--shadow-*` only for floating layers |
+| Responsive collapsing (3-up to 1-up, no scaling-down) | yes | see Breakpoints below |
+| Cream/coral/navy hex values | no | `--background`, `--accent`, `--code-background` instead |
+| Copernicus / Tiempos / StyreneB / Inter display | no | `--font-sans`, `--font-editorial`, `--font-response` instead |
+| Spike-mark brand glyph | no | Pawzz mark from `PawzzMark` only |
+
+### Buttons (sizes ported, theme kept)
+
+- **Primary** — `background: var(--accent)`, `color: var(--accent-foreground)`,
+  `font: 500 var(--text-small)/1 var(--font-sans)`, min-height 40px,
+  `padding: var(--space-3) var(--space-5)`, `border-radius: var(--radius-sm)`.
+  Hover: `var(--accent-hover)`. Press: `opacity: 0.7` per `global.css` — no
+  scale, no bounce. Focus: `var(--focus-ring)`. Disabled: muted surface +
+  `var(--placeholder)` text, removed from tab order when it would trap focus.
+- **Secondary** — `background: var(--surface)`, `color: var(--foreground)`,
+  `1px solid var(--border)`, same height / padding / radius as primary.
+- **Secondary on dark** — `background: var(--surface-elevated)` resolved in
+  `.dark`, `color: var(--foreground)` resolved in `.dark`. Never an inverted
+  light chip floating on a dark card.
+- **Text link** — no background; `color: var(--accent)` for inline body links,
+  underline on press only.
+- **Icon button** — 36px circle, `var(--surface)` + hairline border, Lucide
+  glyph only (no emoji).
+- Touch target minimum: 40px. Inputs: height 40px, `var(--radius-sm)`,
+  `1px solid var(--border)`, focus lifts the container (caret inside, no halo
+  around the textarea itself).
+
+### Cards and bands (spacing ported, theme kept)
+
+- **Standard content card** — `background: var(--surface)`,
+  `1px solid var(--border-subtle)`, `border-radius: var(--radius-md)`,
+  `padding: var(--space-8)`. Title `--text-subsection`, body `--text-body`.
+- **Compact tile** — same surface/border/radius, `padding: var(--space-6)`.
+  Whole tile tappable where it navigates; effective target well above 44px.
+- **Code card** — `background: var(--code-background)`,
+  `1px solid var(--border-subtle)`, `border-radius: var(--radius-md)`,
+  `padding: var(--space-6)`, Mono at `--text-code`, horizontal scroll, never
+  wrap. Syntax hues from `--syntax-*` only.
+- **Featured / callout band** — full-bleed `var(--accent)` with
+  `var(--accent-foreground)` text, `border-radius: var(--radius-md)`,
+  `padding: var(--space-12)`, or dark `var(--surface-subtle)`-in-dark with
+  foreground text. The band color IS the emphasis; the CTA inside inverts
+  (surface button on accent band). One band per view — never a callout card
+  inside another card.
+- **Hero band (marketing only)** — single-column or 6/6 split, vertical padding
+  96px, max content width 1200px. The hero visual is the product UI, per the
+  existing marketing rule — no stock illustration language.
+- **Badges** — pill `999px`, `var(--text-caption)` 500, `4px 12px` padding.
+  Default: `var(--surface-subtle)` + `var(--foreground)`. Accent badge:
+  `var(--accent)` + `var(--accent-foreground)`, uppercase with wide tracking
+  for NEW / BETA only.
+- **Tabs / filters** — inactive transparent + `var(--muted-foreground)`;
+  active `var(--surface-subtle)` + `var(--foreground)`,
+  `padding: 8px 14px`, `border-radius: var(--radius-sm)`.
+
+### Breakpoints (structure ported)
+
+| Name | Width | Key changes |
+| --- | --- | --- |
+| Mobile | < 768px | single column; hero stacks; feature grids 1-up; tiles 2-up then 1-up; footer/nav collapse |
+| Tablet | 768–1024px | feature cards 2-up; tiles 3-up |
+| Desktop | 1024–1440px | full nav; 3-up cards; 4-up or 6-up tiles |
+| Wide | > 1440px | same as desktop; content capped (app: `--reading-width` 780px; marketing: 1200px) |
+
+Collapsing reduces columns, never scales cards down. Code blocks scroll
+horizontally on mobile. Grids never nest a grid inside a card that is itself
+inside another card — flatten first, then collapse.
+
+### Do / Don't (Pawzz wording)
+
+Do: one surface level per view; hairlines over shadows; accent reserved for
+primary CTAs, focus, and one full-bleed band at a time; generous card padding;
+honest empty/error states with an action; motion that explains (140/220/360ms).
+
+Don't: emojis; nested containers; outside hex or outside fonts; bold editorial
+serif as decoration; accent on every element; hover styling beyond the tokens;
+invented durations or z-index values off the ladder.

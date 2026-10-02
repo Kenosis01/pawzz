@@ -1,5 +1,6 @@
-import { AppearancePage } from "~/screens/settings";
+import { redirect } from "next/navigation";
 
+/** Appearance folded into General. */
 export default function Page() {
-  return <AppearancePage />;
+  redirect("/settings/general");
 }

@@ -1,0 +1,123 @@
+/* Custom dropdown — same popover recipe as ProfileMenu/ChatRowMenu, since the
+   native select popup is platform-drawn and refuses every styling attempt. */
+
+.root {
+  position: relative;
+}
+
+.trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-height: 40px;
+  padding: var(--space-2) var(--space-4);
+  color: var(--foreground);
+  font-family: inherit;
+  font-size: var(--text-small);
+  text-align: left;
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color var(--duration-micro) var(--ease-standard);
+}
+
+.trigger:hover {
+  border-color: var(--border-strong);
+}
+
+.trigger:focus-visible {
+  outline: none;
+  border-color: var(--border-strong);
+  box-shadow: var(--focus-ring);
+}
+
+/* The selected label truncates instead of stretching the field: the Auto
+   model's description is a full sentence, and a field sized to it would
+   swallow the row. The list below shows it in full. */
+.value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chevron {
+  flex-shrink: 0;
+  color: var(--muted-foreground);
+  transition: transform var(--duration-micro) var(--ease-standard);
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.list {
+  position: absolute;
+  top: calc(100% + var(--space-1));
+  left: 0;
+  z-index: var(--z-overlay);
+  width: max-content;
+  min-width: 100%;
+  /* Capped against the viewport so a 32rem field near the dialog's edge does
+     not push the list off-screen. Labels ellipsize inside the cap. */
+  max-width: calc(100vw - var(--space-8));
+  max-height: min(320px, 50vh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--space-1);
+  background: var(--surface-elevated);
+  border: 0.5px solid var(--material-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-popover);
+  animation: list-in var(--duration-micro) var(--ease-standard);
+}
+
+@keyframes list-in {
+  from {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+}
+
+.list:focus {
+  outline: none;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  color: var(--foreground);
+  font-size: var(--text-small);
+  text-align: left;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.option[data-active="true"] {
+  background: var(--surface-subtle);
+}
+
+.option[aria-selected="true"] {
+  font-weight: 600;
+}
+
+.optionLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.check {
+  flex-shrink: 0;
+  color: var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .list {
+    animation: none;
+  }
+}

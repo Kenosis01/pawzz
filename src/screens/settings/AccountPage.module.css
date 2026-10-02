@@ -40,16 +40,32 @@
   color: var(--placeholder);
 }
 
+/* Same geometry as every other button in the app: 40px tall, --space-3/5,
+   --radius-sm, weight 500. It was --space-2/4 at --radius-md, which made the
+   only button on the page look like a different control from the ones around
+   it. */
 .save {
-  padding: var(--space-2) var(--space-4);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 40px;
+  padding: var(--space-3) var(--space-5);
   color: var(--accent-foreground);
   font-size: var(--text-small);
   font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
   background: var(--accent);
-  border-radius: var(--radius-md);
+  border: 0.5px solid transparent;
+  border-radius: var(--radius-sm);
   transition:
     background var(--duration-micro) var(--ease-standard),
     opacity var(--duration-micro) var(--ease-standard);
+}
+
+.save:hover:not(:disabled) {
+  background: var(--accent-hover);
 }
 
 .save:disabled {

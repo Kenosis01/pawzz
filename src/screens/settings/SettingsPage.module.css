@@ -1,23 +1,41 @@
-/*
- * Shared shell for the settings sections.
- *
- * The two sections that were built out first (Account, Appearance) carry their
- * own modules and are left untouched, so their markup stays identical to the
- * desktop build. Everything added after them uses this, so the eight newer
- * sections are consistent with each other and with the token language rather
- * than each inventing spacing.
- */
+/* Settings dialog content — centered, plain rows, no cards. */
 
 .page {
   display: flex;
   flex-direction: column;
-  gap: var(--space-8);
-  max-width: var(--reading-width);
-  padding: var(--space-8);
+  width: 100%;
+  max-width: 620px;
+  margin: 0 auto;
+  padding: var(--space-2) 0 var(--space-8);
+}
+
+/* Sections are blocks of a document, not paragraphs of one: the heading of
+   the next section lands directly on the last control of the previous one
+   without this ("Available models" was touching the default-model select).
+   The gap matches the space above a `.title`, so a section break reads the
+   same whether the page is built from sections or from titles. */
+.page > section + section {
+  margin-top: var(--space-6);
+}
+
+.title {
+  margin-top: var(--space-6);
+  font-size: var(--text-body);
+  font-weight: 600;
+}
+
+.title:first-child {
+  margin-top: 0;
+}
+
+.lead {
+  margin-top: var(--space-1);
+  color: var(--muted-foreground);
+  font-size: var(--text-small);
 }
 
 .heading {
-  font-size: var(--text-subsection);
+  font-size: var(--text-body);
   font-weight: 600;
 }
 
@@ -28,50 +46,21 @@
 }
 
 .note {
-  margin-top: var(--space-2);
-  max-width: 44rem;
+  margin-top: var(--space-3);
   color: var(--muted-foreground);
   font-size: var(--text-small);
   line-height: var(--leading-body);
 }
 
-/* ---- About ---- */
-
-.about {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-}
-
-/* ---- Rows ----
-   A label on the left, a control on the right. The pattern every settings
-   surface converges on, so it lives here once. */
-
-.group {
-  display: flex;
-  flex-direction: column;
-  margin-top: var(--space-4);
-  border: 0.5px solid var(--border);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-}
-
+/* Plain row: label left, control right, hairline between. No box. */
 .row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-4);
-  padding: var(--space-3) var(--space-4);
-  /* A row is often a <button>, and buttons centre their text by default. With
-     short labels that reads fine; with a model name beside a context size and a
-     price it reads as a centred block, so it is set explicitly here. */
+  padding: var(--space-3) 0;
   text-align: left;
-  background: var(--surface);
   border-bottom: 0.5px solid var(--border-subtle);
-}
-
-.row:last-child {
-  border-bottom: none;
 }
 
 .rowText {
@@ -93,91 +82,97 @@
 
 .rowControl {
   flex-shrink: 0;
-}
-
-/* ---- Model catalogue ----
-   The filters sit in a row above the list rather than inside a header cell:
-   there is no table, and a header row would imply columns the rows do not have. */
-
-.filters {
   display: flex;
+  align-items: center;
   gap: var(--space-2);
-  margin-top: var(--space-4);
 }
 
-.filters .textInput {
-  flex: 1;
-}
-
-.defaultRow {
-  display: flex;
-  flex-direction: column;
+/* Theme: the same sliding pill as the segmented group below. The group and the
+   options reuse `.segmented` / `.segment` directly; these two only add the
+   icon-and-label arrangement on top. The icon is a redundant cue on top of the
+   word, never the word's replacement. */
+.themeBtn {
   gap: var(--space-2);
-  align-items: flex-start;
-  margin-top: var(--space-4);
+  padding: 0 var(--space-3);
 }
 
-.defaultRow .select {
-  max-width: 32rem;
-  font-size: var(--text-body);
+.themeBtnLabel {
+  line-height: 1;
 }
 
-.select {
-  padding: var(--space-2) var(--space-3);
-  color: var(--foreground-secondary);
-  font-family: inherit;
-  font-size: var(--text-small);
-  background: var(--surface);
-  border: 0.5px solid var(--border);
+.themeBtn :global(svg) {
+  flex-shrink: 0;
+}
+
+/* Segmented and theme: one sliding pill, exactly like the workspace rail in
+   the sidebar. A pill that travels between segments is the whole reason the
+   rail reads well — an accent underline in the same position only says
+   "selected", and an accent *border* around the selected option draws a box
+   around it that competes with the setting it belongs to.
+
+   Both groups use the same markup: a `.segmented` track with `--seg-count` and
+   `--seg-index`, an absolutely-positioned `.segmentPill` sibling, and
+   transparent segments on top. See ModeSwitch.module.css. */
+.segmented {
+  position: relative;
+  display: inline-grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 0;
+  padding: 3px;
+  /* An inset well, darker than the surface it sits on, so the pill reads as
+     lifted out of it rather than painted onto the panel. */
+  background: color-mix(in srgb, var(--surface-subtle) 88%, black);
+  border: 0.5px solid var(--border-subtle);
   border-radius: var(--radius-md);
-  transition: border-color var(--duration-micro) var(--ease-standard);
 }
 
-.select:hover {
-  border-color: var(--border-strong);
+.segmentPill {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  /* (padding box minus both insets) / count is exactly one column, so
+     translateX(index * 100%) lands the pill precisely on that segment. */
+  width: calc((100% - 6px) / var(--seg-count, 3));
+  pointer-events: none;
+  background: var(--sidebar-active);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-raised);
+  transform: translateX(calc(var(--seg-index, 0) * 100%));
+  transition: transform var(--duration-normal) var(--ease-standard);
 }
 
-/* Capability tags. Quiet by design: a row's real content is its name, and two
-   badges on every row would out-shout it. */
-.tag {
-  margin-left: var(--space-2);
-  padding: 1px var(--space-2);
+.segment {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  min-height: 30px;
+  padding: var(--space-2) var(--space-3);
   color: var(--muted-foreground);
-  font-size: var(--text-caption);
-  font-weight: 400;
-  background: var(--surface-subtle);
-  border-radius: var(--radius-sm);
-}
-
-.more {
-  display: flex;
-  justify-content: center;
-  padding: var(--space-3);
-  background: var(--surface);
-  border-top: 0.5px solid var(--border-subtle);
-}
-
-.error {
-  margin-top: var(--space-4);
-  padding: var(--space-3) var(--space-4);
-  color: var(--foreground-secondary);
   font-size: var(--text-small);
-  line-height: var(--leading-body);
-  background: var(--surface-subtle);
-  border-left: 2px solid var(--danger);
+  font-weight: 500;
+  white-space: nowrap;
   border-radius: var(--radius-sm);
+  transition: color var(--duration-micro) var(--ease-standard);
 }
 
-/* ---- Model list ----
-   No container. The models were a bordered group with a row per entry, which put
-   a second box on a workspace that is already a page: a list of a few hundred
-   models is a field, not a card, and wrapping it in a frame only made the
-   setting look heavier than the thing it controls. Rows are separated by space
-   and a hairline, and the hover state is the only background they have. */
+.segment:hover:not([aria-checked="true"]):not([aria-pressed="true"]) {
+  color: var(--foreground-secondary);
+}
 
+.segment[aria-checked="true"],
+.segment[aria-pressed="true"] {
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+/* Model list — plain rows, hover only. */
 .modelList {
-  margin-top: var(--space-4);
+  margin-top: var(--space-2);
   list-style: none;
+  padding: 0;
 }
 
 .modelRow {
@@ -185,13 +180,12 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-4);
-  padding: var(--space-2) var(--space-2);
-  border-radius: var(--radius-sm);
-  transition: background var(--duration-micro) var(--ease-standard);
+  padding: var(--space-2) 0;
+  border-bottom: 0.5px solid var(--border-subtle);
 }
 
 .modelRow:hover {
-  background: var(--surface-subtle);
+  background: none;
 }
 
 .modelText {
@@ -217,147 +211,254 @@
   padding: var(--space-3) 0;
 }
 
-/* ---- Controls ----
-   Restored: these were lost when the enable-switch block was replaced wholesale,
-   which silently unstyled every button and text field on the settings surface.
-   The switch no longer uses them — it is its own component — but the filter
-   field and the two bulk actions still do. */
-
-.button {
-  padding: var(--space-2) var(--space-4);
-  color: var(--foreground);
-  font-size: var(--text-small);
+.tag {
+  margin-left: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  color: var(--muted-foreground);
+  font-size: var(--text-caption);
   font-weight: 500;
-  background: var(--surface);
-  border: 0.5px solid var(--border);
-  border-radius: var(--radius-md);
-  transition:
-    background var(--duration-micro) var(--ease-standard),
-    border-color var(--duration-micro) var(--ease-standard),
-    opacity var(--duration-micro) var(--ease-standard);
+  background: var(--surface-subtle);
+  border-radius: 999px;
 }
 
-.button:hover {
-  background: var(--surface-subtle);
+.more {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-3) 0;
+}
+
+.error {
+  margin-top: var(--space-4);
+  padding: var(--space-2) 0;
+  color: var(--danger);
+  font-size: var(--text-small);
+  border-left: 2px solid var(--danger);
+  padding-left: var(--space-3);
+}
+
+.filters {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.filters .textInput {
+  flex: 1;
+}
+
+.defaultRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  /* Stretch, not start: the name field, the description and the submit button
+     are one form, and only the swatch row is content-sized. Sizing to
+     `flex-start` shrank every child to its content, so the button came out the
+     width of its own label and stranded in the corner of a 620px column. */
+  align-items: stretch;
+  margin-top: var(--space-4);
+}
+
+.defaultRow .select {
+  max-width: 32rem;
+  font-size: var(--text-body);
+}
+
+.select {
+  min-height: 40px;
+  padding: var(--space-2) var(--space-4);
+  color: var(--foreground);
+  font-family: inherit;
+  font-size: var(--text-small);
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color var(--duration-micro) var(--ease-standard);
+}
+
+.select:hover {
   border-color: var(--border-strong);
 }
 
-.button:disabled {
+.select:focus-visible {
+  outline: none;
+  border-color: var(--border-strong);
+  box-shadow: var(--focus-ring);
+}
+
+/* Buttons — one geometry, three weights.
+   These match MemorySection's `.primary` / `.secondary` / `.textButton` exactly.
+   Two copies of a button style is how a settings panel ends up looking like two
+   products, so the rules are duplicated deliberately and must be changed
+   together. */
+.button,
+.buttonPrimary,
+.textButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 40px;
+  padding: var(--space-3) var(--space-5);
+  font-size: var(--text-small);
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  border-radius: var(--radius-sm);
+  transition:
+    background var(--duration-micro) var(--ease-standard),
+    border-color var(--duration-micro) var(--ease-standard),
+    color var(--duration-micro) var(--ease-standard),
+    opacity var(--duration-micro) var(--ease-standard);
+}
+
+.button {
+  color: var(--foreground);
+  background: var(--surface-subtle);
+  border: 0.5px solid var(--border);
+}
+
+.button:hover:not(:disabled) {
+  background: var(--sidebar-hover);
+  border-color: var(--border-strong);
+}
+
+.buttonPrimary {
+  color: var(--accent-foreground);
+  background: var(--accent);
+}
+
+.buttonPrimary:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.button:disabled,
+.buttonPrimary:disabled,
+.buttonDanger:disabled {
   opacity: 0.4;
   cursor: default;
 }
 
+/* Small: the same control at row height rather than form height. "Create your
+   Agent" is the last step of a form, not the form's headline — at 40px in the
+   accent fill it read as the page's primary action, which is a Save button's
+   job. 30px in the neutral weight is what a secondary step looks like, and
+   `flex-start` so it does not stretch with the rest of the column. */
+.buttonSmall {
+  align-self: flex-start;
+  min-height: 30px;
+  padding: 0 var(--space-4);
+  font-size: var(--text-caption);
+}
+
+/* Danger fill — the one button allowed to be a solid block of non-accent
+   colour. Same 40px / 8px geometry as every other button. */
+.buttonDanger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: var(--space-3) var(--space-5);
+  font-size: var(--text-small);
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--danger-fill-foreground);
+  background: var(--danger-fill);
+  border: 0.5px solid transparent;
+  border-radius: var(--radius-sm);
+  transition:
+    background var(--duration-micro) var(--ease-standard),
+    opacity var(--duration-micro) var(--ease-standard);
+}
+
+.buttonDanger:hover:not(:disabled) {
+  background: var(--danger-fill-hover);
+}
+
+/* Plain group: hairline-separated rows, never a card in a card. */
+.group {
+  display: flex;
+  flex-direction: column;
+  margin-top: var(--space-2);
+  border-top: 0.5px solid var(--border-subtle);
+}
+
 .textInput {
+  flex: 1;
   width: 100%;
   min-width: 0;
-  padding: var(--space-2) var(--space-3);
+  min-height: 40px;
+  padding: var(--space-2) var(--space-4);
   color: var(--foreground);
   font-family: inherit;
   font-size: var(--text-body);
-  background: var(--surface);
-  border: 0.5px solid var(--border);
-  border-radius: var(--radius-md);
-  transition: border-color var(--duration-micro) var(--ease-standard);
+  /* `line-height` would otherwise be the inherited body leading, which on a
+     3-row textarea leaves the first line sitting off-centre in its box. */
+  line-height: var(--leading-body);
+  background: var(--surface-subtle);
+  border: 0.5px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+}
+
+.textInput:where(textarea) {
+  /* Two lines of room to see what is already typed, and to resize down from.
+     `resize: vertical` rather than `none`: the description is the one field
+     here whose useful length is not knowable in advance. */
+  min-height: 76px;
+  resize: vertical;
 }
 
 .textInput::placeholder {
   color: var(--placeholder);
 }
 
-.textInput:hover {
-  border-color: var(--border-strong);
-}
-
+/* Focus is the shared ring. An accent-coloured border *and* a focus ring put
+   orange on the field twice, and the border was the part that read as a
+   validation error rather than as "you are typing here". */
 .textInput:focus {
-  border-color: var(--accent);
+  border-color: var(--border-strong);
   outline: none;
   box-shadow: var(--focus-ring);
 }
 
-
-/* ---- Segmented control ----
-   Used where there are few enough options to show all of them at once, which
-   beats a select: the choices are visible without a click. */
-
-.segmented {
-  display: inline-flex;
-  gap: 2px;
-  padding: 2px;
-  background: var(--surface-subtle);
-  border: 0.5px solid var(--border);
-  border-radius: var(--radius-md);
-}
-
-.segment {
-  padding: var(--space-1) var(--space-3);
+/* Memory */
+.empty {
+  margin-top: var(--space-3);
+  padding: var(--space-2) 0;
   color: var(--muted-foreground);
   font-size: var(--text-small);
-  border-radius: calc(var(--radius-md) - 3px);
-  transition:
-    color var(--duration-micro) var(--ease-standard),
-    background var(--duration-micro) var(--ease-standard);
-}
-
-.segment:hover {
-  color: var(--foreground);
-}
-
-.segment[aria-checked="true"],
-.segment[aria-pressed="true"] {
-  color: var(--foreground);
-  font-weight: 500;
-  background: var(--surface-elevated);
-  box-shadow: var(--shadow-raised);
-}
-
-/* ---- Empty state ----
-   For the sections that describe a capability the product has specified but not
-   yet built. An empty panel with no explanation reads as a bug; this says what
-   the section is for and that nothing is configured. */
-
-.empty {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-3);
-  margin-top: var(--space-4);
-  padding: var(--space-6);
-  background: var(--surface);
-  border: 0.5px dashed var(--border-strong);
-  border-radius: var(--radius-md);
 }
 
 .emptyIcon {
-  display: grid;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  color: var(--muted-foreground);
-  background: var(--surface-subtle);
-  border-radius: var(--radius-md);
+  display: none;
 }
 
 .emptyTitle {
   font-size: var(--text-body);
   font-weight: 500;
+  color: var(--foreground);
 }
 
 .emptyBody {
-  max-width: 42rem;
   color: var(--muted-foreground);
   font-size: var(--text-small);
   line-height: var(--leading-body);
 }
 
-/* ---- Shortcut table ---- */
+/* About */
+.about {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
 
+/* Shortcut table — plain rows. */
 .shortcuts {
   display: flex;
   flex-direction: column;
-  margin-top: var(--space-4);
-  border: 0.5px solid var(--border);
-  border-radius: var(--radius-md);
-  overflow: hidden;
+  margin-top: var(--space-2);
 }
 
 .shortcutRow {
@@ -365,13 +466,8 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-4);
-  padding: var(--space-2) var(--space-4);
-  background: var(--surface);
+  padding: var(--space-2) 0;
   border-bottom: 0.5px solid var(--border-subtle);
-}
-
-.shortcutRow:last-child {
-  border-bottom: none;
 }
 
 .shortcutName {
@@ -385,9 +481,6 @@
   flex-shrink: 0;
 }
 
-/* Scoped, not a bare `kbd`: CSS Modules only emits selectors that contain a
-   local class, and the keycap treatment belongs to these rows rather than to
-   every kbd in the app. Typography still comes from global.css. */
 .key {
   min-width: 20px;
   padding: 1px var(--space-2);
@@ -396,7 +489,116 @@
   font-size: var(--text-caption);
   text-align: center;
   background: var(--surface-subtle);
-  border: 0.5px solid var(--border);
+  border: 0.5px solid var(--border-subtle);
   border-radius: var(--radius-sm);
-  box-shadow: inset 0 -1px 0 var(--border);
+}
+
+/* Agent avatar — the bot itself, not a coloured dot with letters in it.
+   The tile is the tint at 14% and the glyph is the tint at full strength, so
+   the face carries the identity and the colour only says which one it is.
+   Both come from the status palette: an avatar must not introduce a colour
+   that means something else somewhere else in the app. */
+.agentPreview {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  padding: var(--space-3) 0;
+  border-bottom: 0.5px solid var(--border-subtle);
+}
+
+.agentMark {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  color: var(--muted-foreground);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--muted-foreground) 14%, transparent);
+  transition:
+    color var(--duration-micro) var(--ease-standard),
+    background var(--duration-micro) var(--ease-standard);
+}
+
+.agentMark[data-tint="accent"] {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+.agentMark[data-tint="success"] {
+  color: var(--success);
+  background: color-mix(in srgb, var(--success) 14%, transparent);
+}
+
+.agentMark[data-tint="info"] {
+  color: var(--info);
+  background: color-mix(in srgb, var(--info) 14%, transparent);
+}
+
+.agentMark[data-tint="warning"] {
+  color: var(--warning);
+  background: color-mix(in srgb, var(--warning) 14%, transparent);
+}
+
+.agentPreviewName {
+  min-width: 0;
+  font-size: var(--text-body);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The swatch row is a row of bots: four 26px tiles, each showing the face it
+   picks, so the choice is made on the thing being chosen and the colour is a
+   consequence of it. */
+.tint {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  color: var(--muted-foreground);
+  background: none;
+  border-radius: var(--radius-sm);
+  transition:
+    color var(--duration-micro) var(--ease-standard),
+    background var(--duration-micro) var(--ease-standard),
+    box-shadow var(--duration-micro) var(--ease-standard);
+}
+
+.tint:hover {
+  background: var(--surface-subtle);
+}
+
+.tint[data-tint="accent"] {
+  color: var(--accent);
+}
+
+.tint[data-tint="success"] {
+  color: var(--success);
+}
+
+.tint[data-tint="info"] {
+  color: var(--info);
+}
+
+.tint[data-tint="warning"] {
+  color: var(--warning);
+}
+
+/* The chosen bot gets a wash of its own tint and a hairline in it. A ring in
+   the foreground — what a solid swatch needed to be seen as selected — is far
+   too heavy around a 20px face. */
+.tint[aria-checked="true"] {
+  background: color-mix(in srgb, currentColor 14%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 45%, transparent);
+}
+
+.tintRow {
+  display: flex;
+  gap: var(--space-2);
+  /* The one row in this form that is content-sized — four 26px bots do not
+     want stretching across the column. */
+  align-self: flex-start;
 }

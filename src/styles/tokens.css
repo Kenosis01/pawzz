@@ -145,12 +145,15 @@
   --z-toast: 600;
 
   /* Depth — hairline hierarchy, never a floating card with a giant shadow.
-     --focus-ring resolves against whichever --accent is active, so it needs a
-     value in only one place. */
+     --focus-ring is a thin neutral hairline in the surface's own ink, not an
+     accent glow. It was 3px of 40%-opacity terracotta, which put a soft orange
+     halo around every focused field, tab and select in the app — a glow reads
+     as AI-generated chrome and competes with whatever it is highlighting.
+     Focus is still unmistakable: a dark ring at hairline weight. */
   --shadow-window: 0 1px 2px rgb(0 0 0 / 0.06), 0 8px 24px rgb(0 0 0 / 0.08);
   --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.04);
   --shadow-popover: 0 0 0 0.5px var(--material-border), 0 8px 28px rgb(0 0 0 / 0.12);
-  --focus-ring: 0 0 0 3px color-mix(in srgb, var(--accent) 40%, transparent);
+  --focus-ring: 0 0 0 1px var(--foreground);
 }
 
 .dark {

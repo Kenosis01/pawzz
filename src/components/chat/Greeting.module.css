@@ -6,14 +6,33 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-4);
-  /* Matches the composer's own 40rem column so the two read as one unit. */
+  /* The composer's own 40rem column, so the two read as one unit — and, more
+     to the point, so the greeting and the prompt box it sits above have the
+     same width. A greeting wider than the box under it looks like a title bar.
+
+     This cap is also what the line has to fit inside, which is why the type
+     below is sized against *this* box rather than the window's. `cqw` units
+     resolve against the nearest container, which is this element. */
+  container-type: inline-size;
   width: 100%;
   max-width: 40rem;
-  padding-inline: 0.5rem;
+  padding-inline: var(--space-2);
 }
 
 .mark {
   flex-shrink: 0;
+  /* Overrides the `width`/`height` attributes PawzzMark renders. The size is a
+     JS prop and so cannot respond to a media query on its own; tracking the
+     line keeps the pair looking like one object at every width.
+
+     Container-relative like the line below, and for the same reason: once the
+     type stopped scaling with the window, a mark still scaling with the window
+     would drift away from it — at a wide window the text would hold still at
+     its ceiling while the paw kept growing, and the pair would stop reading as
+     one object. 8.3cqw against the line's 7cqw holds that ratio fixed. */
+  width: clamp(1.875rem, 8.3cqw, 3.3rem);
+  height: auto;
+  aspect-ratio: 1;
 }
 
 .line {
@@ -22,14 +41,34 @@
      is small on the body of each letter, so it needs a touch more size and
      slightly looser tracking than a grotesque would to read as intentional. */
   font-family: var(--font-editorial);
-  /* 52px on a 62px line, weight 500 — the empty state's only text, so it is
-     sized to be read across the room rather than scanned. */
-  font-size: 3.25rem;
+  /* One line, always.
+
+     Sized against the 40rem container above, not the window. That is the whole
+     fix: `.greeting` is capped at 640px, so a font-size in `vw` keeps growing
+     with the window while the box it has to fit inside does not — at 6.2vw the
+     type outgrew its own container and wrapped anyway, which is why shrinking
+     it alone did not work.
+
+     `cqw` is the container-relative unit that matches: 7cqw of a 640px
+     column is 45px, which is the ceiling the clamp states — the two are the
+     same number on purpose, so the cap is what the widest column actually
+     produces rather than a limit nothing reaches. The floor is what a
+     narrower column gets, not a fallback — `cqw` scales with the container
+     continuously, so there is no unit to fall back from.
+
+     The longest line in the bank is 24 characters, and 24 of them at 45px is
+     about 490px of a 560px measure. That headroom is what took the ceiling
+     from 38px to 45px: a greeting you can read across the room, still one
+     line. */
+  font-size: clamp(2rem, 7cqw, 2.8125rem);
   font-weight: 500;
-  line-height: 3.875rem;
+  line-height: 1.25;
   letter-spacing: -0.015em;
   color: var(--foreground-display);
-  text-wrap: balance;
+  /* Not `balance`: balancing a line that should never wrap is what produces a
+     tidy two-line block the moment it does. The greeting is one line, so it
+     is not allowed to become two. */
+  text-wrap: nowrap;
   animation: line-in 420ms var(--ease-standard) 60ms both;
 }
 
@@ -45,11 +84,18 @@
     gap: var(--space-3);
   }
 
-  /* The display cut is fluid so a long greeting still fits a narrow window;
-     the line-height follows it so the leading stays proportional. */
+  /* Below this the greeting is allowed to wrap after all.
+     `nowrap` above is a promise the design makes at every width a desktop
+     window can be — a clipped or overflowing greeting is worse than two lines.
+     On a phone, below about 30rem, no font size leaves the bank's longest line
+     — 24 characters — on one line, so the promise is dropped rather than
+     honoured by overflowing off the edge of the screen. The breakpoint moved
+     up from 25rem with the type: the same line at the same size now needs more
+     room than it used to, so the point at which it stops fitting moved too. */
   .line {
-    font-size: clamp(2rem, 9vw, 3.25rem);
-    line-height: 1.18;
+    font-size: 1.75rem;
+    white-space: normal;
+    text-wrap: balance;
   }
 }
 

@@ -12,6 +12,7 @@ does not exist yet. Where a feature is a placeholder, it is named as one — see
 
 | If you want to… | Read |
 | --- | --- |
+| Know how the product is designed and why | [**Design document**](./design-document.md) |
 | Understand how the app is put together | [Architecture](./architecture.md) |
 | Find a file and know what it does | [Project structure](./project-structure.md) |
 | Know what every URL renders | [Routes](./routes.md) |
@@ -19,7 +20,7 @@ does not exist yet. Where a feature is a placeholder, it is named as one — see
 | Work on the chat / streaming / persistence | [Chat runtime](./chat-runtime.md) |
 | Work on model-generated visuals | [Widgets](./widgets.md) |
 | Work on the model catalogue or picker | [Models](./models.md) |
-| Change colours, type, spacing or theming | [Design system](./design-system.md) |
+| Change colours, type, spacing or theming | [Design system](./design-system.md) (tokens as implemented) |
 | Set up a dev environment and open a PR | [Contributing](./contributing.md) |
 | Know what is built and what is stubbed | [Status & roadmap](./status.md) |
 

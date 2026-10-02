@@ -16,10 +16,10 @@
 .action {
   display: grid;
   place-items: center;
-  /* 24px is the accessible floor for a pointer target, and the glyph does not
+  /* 36px icon button: the accessible target, and the glyph does not
      need to fill it. */
-  width: 26px;
-  height: 26px;
+  width: 36px;
+  height: 36px;
   color: var(--muted-foreground);
   border-radius: var(--radius-sm);
   transition:
