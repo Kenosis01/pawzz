@@ -19,6 +19,7 @@ import {
 import { ConfirmDialog } from "../ui/ConfirmDialog";
 import { PawzzMark } from "../brand/PawzzMark";
 import { ChatRowMenu, type HistoryEntry } from "./ChatRowMenu";
+import { ModeSwitch } from "./ModeSwitch";
 import { ProfileMenu } from "./ProfileMenu";
 import { RenameField } from "./RenameField";
 import styles from "./Sidebar.module.css";
@@ -137,6 +138,8 @@ export function Sidebar({
           <PanelLeftCloseIcon size={15} />
         </button>
       </div>
+
+      <ModeSwitch collapsed={collapsed} />
 
       <div className={styles.primary}>
         <Link href="/chat" className={styles.newItem} data-icon-trigger tabIndex={collapsed ? -1 : undefined}>
