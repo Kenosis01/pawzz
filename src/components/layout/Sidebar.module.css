@@ -36,14 +36,20 @@
   touch-action: none;
 }
 
+/* A drawer pull, not a rail. The grip ran top to bottom of the sidebar, so
+   touching the edge lit the whole side of the panel and the eye read it as the
+   sidebar highlighting rather than as the handle. A short centred grip marks the
+   one thing that actually moves, the way a drawer tells you where to pull. */
 .resizer::after {
   content: "";
   position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 3px;
-  width: 2px;
+  top: 50%;
+  left: 50%;
+  width: 4px;
+  height: 44px;
   background: transparent;
+  border-radius: 999px;
+  transform: translate(-50%, -50%);
   transition: background var(--duration-micro) var(--ease-standard);
 }
 
@@ -197,7 +203,12 @@
   flex-direction: column;
   min-height: 0;
   margin-top: var(--space-4);
-  padding-inline: var(--space-2);
+  /* No inline padding of its own. The sidebar's padding is already the inset,
+     so the list sits 8px from each edge — the same inset the nav rows above it
+     have, instead of the extra 8px this used to add and only on this column.
+     It also buys the right edge back: the list used to stop a full two paddings
+     short of the divider, and the titles need that room to run out to it. */
+  padding-inline: 0;
 }
 
 /* Label on the left, settings on the right, both on one baseline. The toggle is
@@ -270,7 +281,11 @@
   align-items: center;
   gap: var(--space-2);
   width: 100%;
-  padding: var(--space-2);
+  /* No right padding: the link has to be able to run to the edge of the row so
+     the title can reach the edge of the sidebar. The three-dot button no longer
+     takes a slot in this flex line (it is taken out of flow below), so nothing
+     is lost by giving the link the last pixel. */
+  padding: var(--space-2) 0 var(--space-2) var(--space-2);
   color: var(--foreground-secondary);
   font-size: var(--text-body);
   border-radius: var(--radius-sm);
@@ -305,15 +320,22 @@
 
 /* Withheld until the row is hovered, or anything inside it takes focus — so the
    keyboard reaches it even though the eye cannot, and a row that is being
-   operated on always shows what it is operating on. */
+   operated on always shows what it is operating on.
+
+   Taken out of flow and pinned to the row instead of sitting beside the link.
+   In flow it cost the title 24px of button plus a gap that were invisible until
+   hover, which is most of why a long name stopped well short of the edge; the
+   title now runs the full width and the button floats over the part of it that
+   has already faded out. */
 .historyMore {
+  position: absolute;
+  top: 50%;
+  right: var(--space-1);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
   width: 24px;
   height: 24px;
-  margin: -4px 0;
   padding: 0;
   color: var(--muted-foreground);
   background: transparent;
@@ -321,6 +343,7 @@
   border-radius: var(--radius-sm);
   cursor: pointer;
   opacity: 0;
+  transform: translateY(-50%);
   transition:
     opacity var(--duration-micro) var(--ease-standard),
     background var(--duration-micro) var(--ease-standard),
@@ -366,11 +389,28 @@
   opacity: 1;
 }
 
+/* The title runs to the edge of the sidebar and dissolves there instead of
+   ending in an ellipsis a full button-width short of it.
+
+   `flex: 1` is what makes the fade sit at the row's edge rather than at the end
+   of the words: with a content-sized box, a short title would carry the whole
+   gradient and fade out on its own last letter. Filling the line puts the fade
+   at a fixed place for every row, and a title that stops early never reaches it.
+
+   A mask rather than a painted gradient laid over the top, for the same reason
+   the transcript does it — an overlay washes the type out from underneath, a
+   mask removes the pixels and keeps what is still shown crisp. */
 .historyTitle {
+  flex: 1;
   min-width: 0;
   overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
+  --history-fade: 2.5rem;
+  mask-image: linear-gradient(
+    to right,
+    #000 calc(100% - var(--history-fade)),
+    transparent
+  );
 }
 
 .historyEmpty {
