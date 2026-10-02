@@ -112,7 +112,8 @@
 
    Both groups use the same markup: a `.segmented` track with `--seg-count` and
    `--seg-index`, an absolutely-positioned `.segmentPill` sibling, and
-   transparent segments on top. See ModeSwitch.module.css. */
+   transparent segments on top. The pill is a sibling rather than a background
+   on the selected segment, so it can slide between them. */
 .segmented {
   position: relative;
   display: inline-grid;

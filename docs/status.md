@@ -20,7 +20,7 @@ repository.
 | Theming | light / dark / system, no flash, live OS changes | `theme.ts`, `layout.tsx` |
 | Onboarding | name, then intent, then into the app | `screens/onboarding/` |
 | Settings | General (with Appearance folded in), Memory, Models; Usage / Subscription / Agents are described placeholders | `screens/settings/` |
-| Shell | resizable collapsible sidebar with the Chat/Work/Design switch, profile menu, 404 | `components/layout/` |
+| Shell | resizable collapsible sidebar, profile menu, 404 | `components/layout/` |
 
 ## Stubs
 

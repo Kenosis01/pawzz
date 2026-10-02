@@ -115,6 +115,11 @@ export function MemorySection() {
 
   const saveTimer = useRef<number | undefined>(undefined);
   const savedRef = useRef("");
+  // The text as it stands right now, which is not the same as the text that
+  // reached storage. `savedRef` only moves when the debounce fires, so between
+  // a keystroke and its write these two disagree — and the unmount flush below
+  // has to read the newer of the two.
+  const draftRef = useRef("");
 
   useEffect(() => {
     let stored = "";
@@ -124,6 +129,7 @@ export function MemorySection() {
       // Storage unavailable — an empty document that lives for this session.
     }
     savedRef.current = stored;
+    draftRef.current = stored;
     setSaved(stored);
     setDraft(stored);
     setHydrated(true);
@@ -133,6 +139,7 @@ export function MemorySection() {
   // is exactly one place that knows how a document reaches storage.
   const persist = useCallback((next: string) => {
     savedRef.current = next;
+    draftRef.current = next;
     setSaved(next);
     setDraft(next);
     try {
@@ -160,10 +167,16 @@ export function MemorySection() {
   // A pending write is flushed on unmount, so navigating away mid-edit — or
   // closing the dialog inside the debounce window — cannot lose the last thing
   // that was typed.
+  //
+  // The draft, not the last saved text. The debounce is 600ms and `savedRef` only
+  // moves when it fires, so writing `savedRef` here cancelled the timer that held
+  // the newer text and then wrote the older one over storage: navigating away
+  // inside the debounce window discarded up to the last half-second of typing,
+  // which is the entire thing the flush exists to prevent.
   useEffect(() => {
     return () => {
       window.clearTimeout(saveTimer.current);
-      const pending = savedRef.current;
+      const pending = draftRef.current;
       try {
         localStorage.setItem(STORAGE_KEY, pending);
       } catch {
@@ -240,6 +253,7 @@ export function MemorySection() {
             defaultValue={saved}
             className={styles.editor}
             onChange={(markdown) => {
+              draftRef.current = markdown;
               setDraft(markdown);
               scheduleSave(markdown);
             }}
